@@ -9,11 +9,14 @@ export interface TimeMachineHooks<S> {
   restore(s: S): void;
   /** Advance exactly one fixed step (the caller increments its own step counter). */
   step(): void;
+  /** Approximate retained bytes of one captured state; enables the `maxBytes` bound. */
+  sizeOf?(s: S): number;
 }
 
 interface Snap<S> {
   step: number;
   state: S;
+  bytes: number;
 }
 
 interface LoggedInput {
@@ -28,12 +31,23 @@ export class TimeMachine<S> {
   viewStep = 0;
   private snaps: Snap<S>[] = [];
   private inputs: LoggedInput[] = [];
+  private retained = 0;
 
+  /**
+   * @param maxBytes upper bound on retained snapshot bytes (needs `hooks.sizeOf`); the oldest
+   *   snapshots are evicted first, so the reachable history shrinks instead of RAM growing.
+   */
   constructor(
     private readonly hooks: TimeMachineHooks<S>,
     readonly every: number,
     readonly window: number,
+    readonly maxBytes: number = Infinity,
   ) {}
+
+  /** Bytes currently retained by snapshots (0 when `sizeOf` is not provided). */
+  get bytes(): number {
+    return this.retained;
+  }
 
   get reviewing(): boolean {
     return this.viewStep < this.liveStep;
@@ -49,10 +63,19 @@ export class TimeMachine<S> {
     this.liveStep = step;
     this.viewStep = step;
     if (step % this.every !== 0) return;
-    this.snaps.push({ step, state: this.hooks.capture() });
+    const state = this.hooks.capture();
+    const bytes = this.hooks.sizeOf ? this.hooks.sizeOf(state) : 0;
+    this.snaps.push({ step, state, bytes });
+    this.retained += bytes;
     const cutoff = step - this.window - this.every;
-    while (this.snaps.length > 1 && this.snaps[1].step <= cutoff) this.snaps.shift();
+    while (this.snaps.length > 1 && this.snaps[1].step <= cutoff) this.dropOldest();
+    while (this.snaps.length > 1 && this.retained > this.maxBytes) this.dropOldest();
     while (this.inputs.length && this.inputs[0].step <= this.snaps[0].step) this.inputs.shift();
+  }
+
+  private dropOldest(): void {
+    const old = this.snaps.shift();
+    if (old) this.retained -= old.bytes;
   }
 
   /** Records an input that takes effect at `step` (before that step is simulated). */
@@ -80,6 +103,7 @@ export class TimeMachine<S> {
   branch(): void {
     const at = this.viewStep;
     this.snaps = this.snaps.filter((s) => s.step <= at);
+    this.retained = this.snaps.reduce((sum, s) => sum + s.bytes, 0);
     this.inputs = this.inputs.filter((e) => e.step <= at);
     this.liveStep = at;
   }

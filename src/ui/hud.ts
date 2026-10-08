@@ -114,6 +114,8 @@ export class Hud {
   private readonly speedHistory: number[] = [];
   private followUid = -1;
   private clockKey = '';
+  /** Sim seconds per real second actually achieved; 0 = unknown (paused / reviewing). */
+  private achieved = 0;
 
   constructor(
     parent: HTMLElement,
@@ -134,6 +136,10 @@ export class Hud {
             <div class="time" data-ref="clock">17:00</div>
             <div class="phase" data-ref="phase">Buổi chiều</div>
           </div>
+          <p class="attrib" style="grid-column: 1 / -1; margin: -2px 0 0; font-size: 11px; line-height: 1.3; color: var(--ink-2); white-space: normal">
+            <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline; text-underline-offset: 2px" data-ref="attrib">© OpenStreetMap contributors</a> ·
+            <a href="https://sites.research.google/gr/open-buildings/" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline; text-underline-offset: 2px; white-space: nowrap">Google Open Buildings</a> · ODbL
+          </p>
           <button class="controls-toggle" data-ref="controlsToggle" aria-expanded="false">Điều khiển ▾</button>
         </header>
         <section class="panel controls" aria-label="Điều khiển mô phỏng">
@@ -193,8 +199,9 @@ export class Hud {
           <div class="tab-pane" data-ref="paneOverview" role="tabpanel">
           <div class="big-stat">
             <div>
-              <span class="label">Tốc độ trung bình</span>
+              <span class="label">Tốc độ giữa 2 đèn</span>
               <div class="n" data-ref="avg">0<small>km/h</small></div>
+              <span class="label" data-ref="avgAll">TB cả lúc dừng: 0 km/h</span>
             </div>
             <svg class="spark" viewBox="0 0 120 44" preserveAspectRatio="none" aria-hidden="true">
               <defs><linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9a23b" stop-opacity=".35"/><stop offset="1" stop-color="#e9a23b" stop-opacity="0"/></linearGradient></defs>
@@ -288,6 +295,7 @@ export class Hud {
           <button class="btn ghost" data-ref="tmToggle">${ICON.rewind}Tua lại</button>
           <span class="hint mouse">Kéo chuột trái để xoay</span>
           <span class="hint mouse">Chuột phải để di chuyển</span>
+          <span class="hint">Lăn chuột hoặc chụm hai ngón để thu phóng</span>
           <span class="hint">Nhấp xe hoặc đường để xem</span>
           <span class="hint optional"><kbd>Space</kbd> dừng · <kbd>1</kbd><kbd>2</kbd><kbd>4</kbd> tốc độ · <kbd>R</kbd> mưa · <kbd>T</kbd> tua · <kbd>H</kbd> ẩn</span>
           <span class="hint optional sign-legend">${ICON.noRight}Cấm rẽ phải khi đèn đỏ</span>
@@ -358,10 +366,23 @@ export class Hud {
       if (sp === 0) b.innerHTML = s.paused ? ICON.play : ICON.pause;
       if (sp === 0) b.setAttribute('aria-label', s.paused ? 'Tiếp tục' : 'Tạm dừng');
     });
-    this.$.speedValue.textContent = s.paused ? 'Tạm dừng' : `×${s.speed}`;
+    this.$.speedValue.textContent = this.speedLabel();
     this.$.live.classList.toggle('paused', s.paused);
     this.$.liveText.textContent = s.paused ? 'Tạm dừng' : 'Đang chạy';
     this.root.classList.toggle('hidden', s.hudHidden);
+  }
+
+  /** Shows the real sim rate beside the chosen multiplier once the machine lags it by more than 10 %. */
+  setAchievedSpeed(rate: number): void {
+    this.achieved = rate;
+    this.$.speedValue.textContent = this.speedLabel();
+  }
+
+  private speedLabel(): string {
+    const s = this.state;
+    if (s.paused) return 'Tạm dừng';
+    const lag = this.achieved > 0 && this.achieved < s.speed * 0.9;
+    return lag ? `×${s.speed} · thực ×${fmt1.format(this.achieved)}` : `×${s.speed}`;
   }
 
   setClock(hour: number, rain: boolean, light: number): void {
@@ -382,7 +403,8 @@ export class Hud {
   }
 
   setKpi(k: TrafficKpi, sampleHistory: boolean): void {
-    this.$.avg.innerHTML = `${fmt1.format(k.avgKmh)}<small>km/h</small>`;
+    this.$.avg.innerHTML = `${fmt1.format(k.movingKmh)}<small>km/h</small>`;
+    this.$.avgAll.textContent = `TB cả lúc dừng: ${fmt1.format(k.avgKmh)} km/h`;
     this.$.count.textContent = fmt0.format(k.count);
     this.$.waiting.textContent = fmt0.format(k.waiting);
     this.$.congValue.textContent = `${Math.round(k.congestion)}%`;
@@ -400,7 +422,7 @@ export class Hud {
       row.children[3].textContent = `${fmt1.format(pct)}%`;
     });
     if (sampleHistory) {
-      this.speedHistory.push(k.avgKmh);
+      this.speedHistory.push(k.movingKmh);
       if (this.speedHistory.length > 90) this.speedHistory.shift();
     }
     const hist = this.speedHistory;
@@ -516,7 +538,7 @@ export class Hud {
   }
 
   setTimeline(t: TimelineView): void {
-    const key = `${t.open}|${t.reviewing}|${t.min}|${t.offset}|${t.clock}`;
+    const key = `${t.open}|${t.reviewing}|${t.min}|${t.offset}|${t.clock}|${this.state.autoTime}`;
     if (key === this.tlKey) return;
     this.tlKey = key;
     this.$.timebar.hidden = !t.open;
@@ -528,13 +550,19 @@ export class Hud {
     // Share of the hour that has been recorded so far, shown as the track fill.
     range.style.setProperty('--avail', `${Math.round((-t.min / 3600) * 100)}%`);
     this.$.tbTime.textContent = t.clock;
-    const mins = Math.round(-t.offset / 60);
-    this.$.tbOff.textContent = t.reviewing ? `lùi ${mins} phút` : 'hiện tại';
+    // `offset` counts 60 Hz steps, so `-offset / 60` is sim-seconds; with the clock running that is one game-minute each, with the clock pinned it is plain sim-seconds.
+    const back = Math.round(-t.offset / 60);
+    this.$.tbOff.textContent = t.reviewing ? (this.state.autoTime ? `lùi ${back} phút` : `lùi ${back} giây mô phỏng`) : 'hiện tại';
     this.$.tbBadge.textContent = t.reviewing ? 'Đang xem lại' : 'Trực tiếp';
     this.$.tbBadge.classList.toggle('past', t.reviewing);
     (this.$.tbResume as HTMLButtonElement).disabled = !t.reviewing;
     (this.$.tbLive as HTMLButtonElement).disabled = !t.reviewing;
     this.$.liveText.textContent = t.reviewing ? 'Xem lại' : this.state.paused ? 'Tạm dừng' : 'Đang chạy';
+  }
+
+  /** Shows the map data credit (ODbL requires it next to the map). */
+  setAttribution(text: string): void {
+    this.$.attrib.textContent = text;
   }
 
   setTip(text: string | null, x = 0, y = 0): void {

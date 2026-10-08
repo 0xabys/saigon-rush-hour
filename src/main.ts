@@ -19,47 +19,63 @@ import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { rand01 } from './core/rng';
-import { buildBuildings } from './render/buildings';
+import { Q1_SCHEMA, type NetworkJson, type SceneJson } from './data/q1Schema';
+import networkText from './data/q1-network.json?raw';
+import sceneText from './data/q1-scene.json?raw';
+import { buildBuildings, cutaway } from './render/buildings';
+import { buildConstruction } from './render/construction';
 import { Environment } from './render/environment';
 import { EventsView } from './render/eventsView';
 import { buildGround } from './render/ground';
 import { buildLandmarks } from './render/landmarks';
 import { Life } from './render/life';
 import { shared } from './render/materials';
+import { buildParked } from './render/parked';
 import { SignalsView } from './render/signalsView';
+import { buildTerrain } from './render/terrain';
 import { buildVegetation } from './render/vegetation';
 import { VehicleRenderer } from './render/vehicleRenderer';
 import { Zoning } from './render/zones';
-import { buildNetwork, ROAD_HALF, WORLD, type MapNode } from './sim/network';
+import type { Junction, Road } from './sim/network';
+import { assertNetworkJson, buildOsmNetwork } from './sim/osmMap';
 import { RoadStats, type RoadStatsSnapshot } from './sim/roadStats';
 import { flashHours, Light, SignalSystem } from './sim/signals';
 import { TimeMachine } from './sim/timeMachine';
 import { Traffic, type TrafficKpi, type TrafficSnapshot } from './sim/traffic';
-import { SPECS } from './sim/vehicleTypes';
+import { SPECS, VTYPE_COUNT } from './sim/vehicleTypes';
 import { formatHour, Hud, type AppState, type HudHandlers, type RoadView } from './ui/hud';
 
 const SIM_DT = 1 / 60;
-const MAX_STEPS_PER_FRAME = 12;
-const MAX_VEHICLES = 1900;
+const MAX_STEPS_PER_FRAME = 16;
+/** Wall-clock budget for catch-up sim steps per frame; past it the sim runs below the chosen multiplier instead of freezing the UI. */
+const STEP_BUDGET_MS = 24;
+/** Placeholder until the calibration sweep settles on N_max; the live count is capped by the sim's CAPACITY. */
+const MAX_VEHICLES = 8000;
 const VIEW_HEIGHT = 170;
 const WARMUP_SECONDS = 9;
+/** Boot warm-up runs in slices of this many ms so the progress bar keeps painting. */
+const WARMUP_SLICE_MS = 120;
+/** Upper bound on RAM held by time-machine snapshots; the oldest are dropped first. */
+const TM_MAX_BYTES = 192 * 1024 * 1024;
 
-/** Share of peak demand by hour; rush hours 07–09 and 17–19 peak. */
+/** Share of peak demand by hour; the evening rush 17–19 is the peak, the morning rush 07–09 is a little lighter (TomTom: 64 % vs 87 % congestion). */
 const DEMAND: [number, number][] = [
   [0, 0.4],
   [4, 0.3],
   [5.5, 0.45],
-  [6.5, 0.75],
-  [7, 0.95],
-  [7.25, 1],
-  [8.9, 1],
+  [6.5, 0.72],
+  [7, 0.86],
+  [7.25, 0.9],
+  [8.9, 0.9],
   [9.5, 0.78],
   [11.5, 0.72],
   [13, 0.68],
   [16, 0.8],
-  [17, 0.97],
-  [17.25, 1],
-  [19, 1],
+  [17, 0.92],
+  [17.5, 0.96],
+  [18, 1],
+  [18.5, 1],
+  [19, 0.9],
   [20, 0.85],
   [22, 0.62],
   [24, 0.4],
@@ -120,9 +136,19 @@ async function main(): Promise<void> {
   app.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
+  const bootT0 = performance.now();
+  const networkJson = JSON.parse(networkText) as NetworkJson;
+  const sceneJson = JSON.parse(sceneText) as SceneJson;
+  assertNetworkJson(networkJson);
+  if (sceneJson.schema !== Q1_SCHEMA) throw new Error(`q1-scene.json: schema ${String(sceneJson.schema)}, expected ${Q1_SCHEMA}`);
+  const net = buildOsmNetwork(networkJson);
   const aspect = window.innerWidth / window.innerHeight;
   const camera = new THREE.OrthographicCamera((-VIEW_HEIGHT * aspect) / 2, (VIEW_HEIGHT * aspect) / 2, VIEW_HEIGHT / 2, -VIEW_HEIGHT / 2, 1, 4000);
-  const target0 = new THREE.Vector3(-62, 0, 4);
+  // Open on Bến Thành market, falling back to the middle of the map.
+  const benThanh = sceneJson.landmarks.find((l) => l.key === 'benThanh');
+  const target0 = benThanh
+    ? new THREE.Vector3(benThanh.cx + 70, 0, benThanh.cz - 20)
+    : new THREE.Vector3((net.bounds.minX + net.bounds.maxX) / 2, 0, (net.bounds.minZ + net.bounds.maxZ) / 2);
   const offset = new THREE.Vector3().setFromSphericalCoords(900, 0.98, -0.72);
   camera.position.copy(target0).add(offset);
   camera.zoom = 0.72;
@@ -134,38 +160,43 @@ async function main(): Promise<void> {
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
   controls.screenSpacePanning = false;
-  controls.minZoom = 0.45;
+  controls.minZoom = 0.2;
   controls.maxZoom = 7;
   controls.minPolarAngle = 0.25;
   controls.maxPolarAngle = 1.22;
   controls.zoomToCursor = true;
   controls.update();
 
-  const net = buildNetwork();
-  const signals = new SignalSystem(net.signalNodes);
+  const signals = new SignalSystem(net.signalJunctions);
   const traffic = new Traffic(net, signals);
   const env = new Environment(net);
   scene.add(env.group);
   scene.fog = env.fog;
   scene.background = env.background;
 
+  const terrain = buildTerrain(net, sceneJson);
+  scene.add(terrain.group);
   const ground = buildGround(net);
   scene.add(ground.group);
-  const zoning = new Zoning(net);
-  const buildings = buildBuildings(net, zoning);
+  const zoning = new Zoning(net, sceneJson);
+  const buildings = buildBuildings(net, sceneJson, zoning);
   scene.add(buildings.group);
-  scene.add(buildLandmarks(net));
-  const veg = buildVegetation(net, zoning);
+  scene.add(buildConstruction(sceneJson, (x, z) => zoning.roadDist(x, z)).group);
+  scene.add(buildLandmarks(net, sceneJson));
+  const veg = buildVegetation(net, sceneJson, zoning);
   scene.add(veg.group);
+  const parked = buildParked(net, sceneJson, zoning, buildings.shopFronts, [buildings.group, veg.group]);
+  scene.add(parked.group);
   const signalsView = new SignalsView(net);
   scene.add(signalsView.group);
   const vehicles = new VehicleRenderer();
   scene.add(vehicles.group);
-  const life = new Life(net);
+  const life = new Life(net, sceneJson);
   scene.add(life.group);
-  const eventsView = new EventsView(net);
+  const eventsView = new EventsView(net, traffic.floods);
   scene.add(eventsView.group);
   const stats = new RoadStats(net);
+  if (import.meta.env.DEV) console.info(`[osm] world built in ${Math.round(performance.now() - bootT0)} ms`);
 
   const state: AppState = {
     paused: false,
@@ -242,9 +273,19 @@ async function main(): Promise<void> {
         stats.restore(s.stats);
       },
       step: stepSim,
+      sizeOf: (s) => {
+        let n = s.traffic.free.length * 8 + s.traffic.incidents.length * 160;
+        for (const a of s.traffic.arrays) n += a.byteLength;
+        for (const a of s.traffic.peds.arrays) n += a.byteLength;
+        const r = s.traffic.router;
+        if (r) n += r.vHat.byteLength + r.tauActive.byteLength + r.tauBuild.byteLength;
+        const st = s.stats;
+        return n + st.vehSum.byteLength + st.speedSum.byteLength + st.samples.byteLength + st.liveCount.byteLength + st.liveSpeed.byteLength;
+      },
     },
     60,
     3600,
+    TM_MAX_BYTES,
   );
 
   /** Applies a sim-affecting control change and logs it so rewinds replay it at the same step. */
@@ -262,8 +303,17 @@ async function main(): Promise<void> {
   traffic.hour = state.hour;
   traffic.target = targetCount();
   traffic.populate(traffic.target);
-  for (let i = 0; i < WARMUP_SECONDS / SIM_DT; i++) stepSim();
+  const warmSteps = Math.round(WARMUP_SECONDS / SIM_DT);
+  for (let done = 0; done < warmSteps; ) {
+    const t0 = performance.now();
+    do {
+      stepSim();
+      done++;
+    } while (done < warmSteps && performance.now() - t0 < WARMUP_SLICE_MS);
+    if (done < warmSteps) await bootProgress('Thả xe ra đường…', 52 + (done / warmSteps) * 24, 2);
+  }
   tm.afterLiveStep(stepCount);
+  if (import.meta.env.DEV) console.info(`[tm] first snapshot ${(tm.bytes / 1048576).toFixed(2)} MiB, cap ${TM_MAX_BYTES / 1048576} MiB`);
 
   // ---- post-processing
   const composerTarget = new THREE.WebGLRenderTarget(window.innerWidth * dpr, window.innerHeight * dpr, {
@@ -356,20 +406,74 @@ async function main(): Promise<void> {
     });
   }
   const hud = new Hud(document.body, state, handlers);
+  if (net.attribution) hud.setAttribution(net.attribution);
 
-  const endName = (n: MapNode) => (n.kind === 'portal' ? 'rìa bản đồ' : n.kind === 'ring' ? 'vòng xoay Bến Thành' : n.name.replace('Giao lộ ', 'giao lộ '));
+  /** The two ends of a road: the dead-end junctions of its undirected link graph (farthest pair if it branches). */
+  const roadEnds = new Map<number, [Junction, Junction]>();
+  function endsOf(r: Road): [Junction, Junction] {
+    let ends = roadEnds.get(r.id);
+    if (ends) return ends;
+    const edges = new Set<number>();
+    const degree = new Map<Junction, number>();
+    for (const l of r.links) {
+      const a = l.from as Junction;
+      const b = l.to as Junction;
+      const key = Math.min(a.id, b.id) * 100000 + Math.max(a.id, b.id);
+      if (edges.has(key)) continue;
+      edges.add(key);
+      degree.set(a, (degree.get(a) ?? 0) + 1);
+      degree.set(b, (degree.get(b) ?? 0) + 1);
+    }
+    const leaves = [...degree].filter(([, d]) => d === 1).map(([j]) => j);
+    ends = [r.links[0].from as Junction, r.links[r.links.length - 1].to as Junction];
+    let far = -1;
+    for (let i = 0; i < leaves.length; i++) {
+      for (let k = i + 1; k < leaves.length; k++) {
+        const d = Math.hypot(leaves[i].x - leaves[k].x, leaves[i].z - leaves[k].z);
+        if (d > far) {
+          far = d;
+          ends = [leaves[i], leaves[k]];
+        }
+      }
+    }
+    roadEnds.set(r.id, ends);
+    return ends;
+  }
+  const endName = (j: Junction): string => {
+    if (j.kind === 'portal') return 'rìa bản đồ';
+    if (j.kind === 'dead') return j.name ? j.name.replace('Cuối đường', 'cuối đường') : 'cuối đường';
+    if (j.kind === 'ring') return (net.rings[j.ring]?.name || j.name).replace('Vòng xoay', 'vòng xoay') || 'vòng xoay';
+    return /#\d/.test(j.name) || !j.name ? 'một giao lộ' : j.name.replace('Giao lộ ', 'giao lộ ');
+  };
   function roadView(id: number): RoadView {
     const r = net.roads[id];
     const len = stats.lengths[id];
+    const [a, b] = endsOf(r);
     return {
       name: r.bridge ? r.name : `Đường ${r.name}`,
-      span: `Từ ${endName(r.a)} đến ${endName(r.b)} · ${Math.round(len)} m`,
+      span: `Từ ${endName(a)} đến ${endName(b)} · ${Math.round(len)} m`,
       liveKmh: stats.liveSpeed[id] * 3.6,
       liveCount: stats.liveCount[id],
       liveDensity: stats.liveCount[id] / Math.max(0.01, len / 100),
       series: stats.series(id),
       hour: state.hour,
     };
+  }
+  /** Point on the road's centreline halfway along its links (for the camera glide). */
+  function roadMid(r: Road): [number, number] {
+    let total = 0;
+    for (const l of r.links) total += l.length;
+    let acc = total / 2;
+    const p = [0, 0, 0, 0];
+    for (const l of r.links) {
+      if (acc > l.length) {
+        acc -= l.length;
+        continue;
+      }
+      l.sample(acc, p);
+      return [p[0] + p[3] * l.refOffset, p[1] - p[2] * l.refOffset];
+    }
+    return [controls.target.x, controls.target.z];
   }
   const camGlide = { t: 1, fromX: 0, fromZ: 0, toX: 0, toZ: 0 };
   function selectRoad(id: number): void {
@@ -378,8 +482,8 @@ async function main(): Promise<void> {
     hud.setFollow(null);
     hud.setTab('road');
     hud.setRoad(roadView(id));
-    const r = net.roads[id];
-    Object.assign(camGlide, { t: 0, fromX: controls.target.x, fromZ: controls.target.z, toX: (r.a.x + r.b.x) / 2, toZ: (r.a.z + r.b.z) / 2 });
+    const [mx, mz] = roadMid(net.roads[id]);
+    Object.assign(camGlide, { t: 0, fromX: controls.target.x, fromZ: controls.target.z, toX: mx, toZ: mz });
   }
 
   const raycaster = new THREE.Raycaster();
@@ -390,7 +494,7 @@ async function main(): Promise<void> {
     ndc.set((px / window.innerWidth) * 2 - 1, -(py / window.innerHeight) * 2 + 1);
     raycaster.setFromCamera(ndc, camera);
     if (!raycaster.ray.intersectPlane(groundPlane, hit)) return -1;
-    return stats.nearest(hit.x, hit.z, ROAD_HALF + 1.5);
+    return stats.nearest(hit.x, hit.z, 10);
   }
 
   function startFollow(i: number): void {
@@ -492,16 +596,22 @@ async function main(): Promise<void> {
   window.addEventListener('resize', resize);
 
   // ---- frame
-  const kpi: TrafficKpi = { count: 0, avgKmh: 0, congestion: 0, waiting: 0, mix: new Array(8).fill(0) };
+  const kpi: TrafficKpi = { count: 0, avgKmh: 0, movingKmh: 0, congestion: 0, waiting: 0, mix: new Array<number>(VTYPE_COUNT).fill(0), releases: 0, locksBroken: 0, teleports: 0 };
   let acc = 0;
+  // Achieved sim rate (sim seconds per real second) over a short window, for the HUD.
+  let rateSteps = 0;
+  let rateWall = 0;
+  let rateSpeed: number = state.speed;
+  let lastRenderNow = -1;
   let last = performance.now();
   let hudTimer = 0;
   let sparkTimer = 0;
   let frameNo = 0;
   const followDelta = new THREE.Vector3();
+  let cutK = 0;
   const roadBase = new THREE.Color(0x4d4843);
   const walkBase = new THREE.Color(0xffffff);
-  const intro = { t: 0, from: camera.zoom, to: 1.5, dur: 2.8 };
+  const intro = { t: 0, from: camera.zoom, to: 1.2, dur: 2.8 };
 
   // Adaptive quality: if frames stay slow, step down once per tier (never back up, to avoid flicker).
   // Tier 2 = full; 1 = native pixel ratio 1; 0 = also no bloom and a smaller shadow map.
@@ -530,14 +640,27 @@ async function main(): Promise<void> {
     if (intro.t >= intro.dur) adaptQuality(realDt);
     // While reviewing the past the clock is frozen at the viewed moment.
     if (!state.paused && !tm.reviewing) acc += realDt * state.speed;
+    const stepT0 = performance.now();
     let steps = 0;
     while (acc >= SIM_DT && steps < MAX_STEPS_PER_FRAME) {
+      // The first step always runs so the sim never stalls; the rest only while this frame's budget lasts.
+      if (steps > 0 && performance.now() - stepT0 > STEP_BUDGET_MS) break;
       stepSim();
       tm.afterLiveStep(stepCount);
       acc -= SIM_DT;
       steps++;
     }
-    if (steps === MAX_STEPS_PER_FRAME) acc = Math.min(acc, SIM_DT);
+    if (acc >= SIM_DT) acc = Math.min(acc, SIM_DT);
+    const wallMs = lastRenderNow < 0 ? 0 : Math.max(0, now - lastRenderNow);
+    lastRenderNow = now;
+    if (state.paused || tm.reviewing || state.speed !== rateSpeed || wallMs > 1000) {
+      rateSteps = 0;
+      rateWall = 0;
+      rateSpeed = state.speed;
+    } else {
+      rateSteps += steps;
+      rateWall += wallMs;
+    }
     const alpha = acc / SIM_DT;
 
     if (intro.t < intro.dur) {
@@ -576,8 +699,8 @@ async function main(): Promise<void> {
       }
     }
     // Keep the camera over the diorama.
-    const tx = Math.min(WORLD.maxX, Math.max(WORLD.minX, controls.target.x));
-    const tz = Math.min(WORLD.maxZ, Math.max(WORLD.minZ, controls.target.z));
+    const tx = Math.min(net.bounds.maxX, Math.max(net.bounds.minX, controls.target.x));
+    const tz = Math.min(net.bounds.maxZ, Math.max(net.bounds.minZ, controls.target.z));
     if (tx !== controls.target.x || tz !== controls.target.z) {
       camera.position.x += tx - controls.target.x;
       camera.position.z += tz - controls.target.z;
@@ -585,6 +708,14 @@ async function main(): Promise<void> {
       controls.target.z = tz;
     }
     controls.update();
+
+    // Follow cutaway: ease a see-through tube in around the followed vehicle (see buildings.ts `cutaway`).
+    cutK += ((followIdx >= 0 ? 1 : 0) - cutK) * (1 - Math.exp(-realDt * 6));
+    if (followIdx >= 0) {
+      cutaway.focus.value.set(vehicles.rx[followIdx], 0.8, vehicles.rz[followIdx], 0);
+      cutaway.dir.value.copy(camera.position).sub(controls.target).normalize();
+    }
+    cutaway.focus.value.w = cutK > 0.01 ? cutK * Math.min(28, Math.max(10, (0.26 * (camera.top - camera.bottom)) / camera.zoom)) : 0;
 
     const pxPerUnit = (camera.zoom * window.innerHeight) / (camera.top - camera.bottom);
     const viewHalf = (camera.right - camera.left) / 2 / camera.zoom;
@@ -597,7 +728,7 @@ async function main(): Promise<void> {
     ground.roadMat.color.copy(roadBase).multiplyScalar(1 - 0.38 * wet);
     ground.walkMat.color.copy(walkBase).multiplyScalar(1 - 0.18 * wet);
     ground.walkMat.roughness = 0.9 - 0.4 * wet;
-    ground.water.uniforms.uSky.value.copy(env.skyColor);
+    terrain.water.uniforms.uSky.value.copy(env.skyColor);
     veg.poolMat.opacity = shared.uNight.value * 0.62;
     signalsView.update(signals, simTime, pxPerUnit);
     life.update(simTime, state.hour);
@@ -625,6 +756,11 @@ async function main(): Promise<void> {
     if (hudTimer > 0.25) {
       hudTimer = 0;
       traffic.kpi(kpi);
+      if (rateWall >= 500) {
+        hud.setAchievedSpeed((rateSteps * SIM_DT) / (rateWall / 1000));
+        rateSteps = 0;
+        rateWall = 0;
+      } else if (state.paused || tm.reviewing) hud.setAchievedSpeed(0);
       const sample = sparkTimer > 1 && !state.paused && !tm.reviewing;
       if (sample) sparkTimer = 0;
       hud.setKpi(kpi, sample);
@@ -651,6 +787,11 @@ async function main(): Promise<void> {
   }
   await bootProgress('Lên đèn xanh!', 100, 0);
   bootEl.classList.add('done');
+  if (import.meta.env.DEV) {
+    const info = renderer.info.render;
+    console.info('[osm] boot', { calls: info.calls, triangles: info.triangles, quality, warnings: net.warnings.length, floods: traffic.floods.length, roads: net.roads.length });
+    for (const w of net.warnings) console.info('[osm] warning:', w);
+  }
   last = performance.now();
   intro.t = 0;
 

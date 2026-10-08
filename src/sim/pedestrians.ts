@@ -1,5 +1,5 @@
 import { Rng } from '../core/rng';
-import { REF_OFFSET, ROAD_HALF, SegKind, type Network, type Segment } from './network';
+import { SegKind, type Network, type Segment } from './network';
 import { Light, type SignalSystem } from './signals';
 
 export const PED_CAP = 180;
@@ -12,6 +12,8 @@ interface Crosswalk {
   group: number;
   cx: number;
   cz: number;
+  /** Half the width of the road it spans, plus the verge people start from. */
+  half: number;
   /** Unit vector across the road and along it. */
   px: number;
   pz: number;
@@ -59,14 +61,16 @@ export class Pedestrians {
     net: Network,
     private readonly signals: SignalSystem,
   ) {
-    net.signalNodes.forEach((n, nodeIndex) => {
-      for (const arm of n.arms) {
-        const d = arm.trim - 2.1;
+    net.signalJunctions.forEach((j, nodeIndex) => {
+      for (const arm of j.arms) {
+        if (!arm.inLink?.signal) continue;
+        // The zebra sits between the junction box and the stop line.
         this.crosswalks.push({
           nodeIndex,
-          group: arm.inLink.signal!.group,
-          cx: n.x + arm.ox * d,
-          cz: n.z + arm.oz * d,
+          group: arm.inLink.signal.group,
+          cx: arm.stopX - arm.ox * 2.1,
+          cz: arm.stopZ - arm.oz * 2.1,
+          half: arm.roadHalf + 1.1,
           px: -arm.oz,
           pz: arm.ox,
           ox: arm.ox,
@@ -74,13 +78,10 @@ export class Pedestrians {
         });
       }
     });
-    // One direction per road is enough: the crossing spans both carriageways.
-    const seen = new Set<number>();
-    this.midBlocks = net.links.filter((l) => {
-      if (l.kind !== SegKind.Link || !l.road || l.road.bridge || l.length < 50 || seen.has(l.road.id)) return false;
-      seen.add(l.road.id);
-      return true;
-    });
+    // One direction per street section is enough: the crossing spans the whole carriageway.
+    this.midBlocks = net.links.filter(
+      (l) => l.kind === SegKind.Link && !l.bridge && l.length >= 50 && (l.oneway || (l.from?.id ?? 0) < (l.to?.id ?? 0)),
+    );
     this.all = [this.x, this.z, this.dx, this.dz, this.ax, this.az, this.len, this.prog, this.speed, this.seed];
   }
 
@@ -108,7 +109,6 @@ export class Pedestrians {
   step(dt: number, t: number, hour: number, rain: number): void {
     const crowd = (hour < 5 ? 0.12 : hour < 7 ? 0.45 : hour < 16 ? 0.75 : hour < 22 ? 1 : 0.35) * (1 - rain * 0.6);
     const rng = this.rng;
-    const half = ROAD_HALF + 1.1;
     for (const cw of this.crosswalks) {
       const st = this.signals.query(cw.nodeIndex, cw.group, t);
       // Only start crossing with enough red left to make it across; at night under flashing amber
@@ -120,16 +120,18 @@ export class Pedestrians {
       const along = rng.range(-1.1, 1.1);
       const ox = cw.cx + cw.ox * along;
       const oz = cw.cz + cw.oz * along;
+      const half = cw.half;
       this.spawn(ox + cw.px * half * side, oz + cw.pz * half * side, ox - cw.px * half * side, oz - cw.pz * half * side, rng.range(1.1, 1.6), 0);
     }
-    if (rng.next() < 0.22 * crowd * dt) {
+    if (this.midBlocks.length > 0 && rng.next() < 0.22 * crowd * dt) {
       const link = this.midBlocks[rng.int(this.midBlocks.length)];
       link.sample(rng.range(14, link.length - 14), this.tmp);
       // Link samples sit on the right-hand reference line; step back to the road centre.
       const rx = -this.tmp[3];
       const rz = this.tmp[2];
-      const cx = this.tmp[0] - rx * REF_OFFSET;
-      const cz = this.tmp[1] - rz * REF_OFFSET;
+      const cx = this.tmp[0] - rx * link.refOffset;
+      const cz = this.tmp[1] - rz * link.refOffset;
+      const half = link.roadHalf + 1.1;
       const side = rng.next() < 0.5 ? 1 : -1;
       this.spawn(cx + rx * half * side, cz + rz * half * side, cx - rx * half * side, cz - rz * half * side, rng.range(0.75, 1.05), 1);
     }

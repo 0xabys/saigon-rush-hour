@@ -7,7 +7,20 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "osm": "bun scripts/osm/index.ts",
+    "osm:check": "bun scripts/osm/index.ts --check",
+    "osm:refresh": "bun scripts/osm/index.ts --refresh",
+    "osm:refresh-extra": "bun scripts/osm/index.ts --refresh-extra",
+    "osm:refresh-gob": "bun scripts/osm/index.ts --refresh-gob",
+    "debug": "vite --open /debug.html",
+    "harness": "bun scripts/harness.ts",
+    "harness:seeds": "bun scripts/harness.ts --seeds 5",
+    "harness:sweep": "bun scripts/harness.ts --seeds 5 --sweep 4000,6000,8000",
+    "harness:ss30": "bun scripts/harness.ts --protocol ss30 --seeds 5 --sweep 4000,8000",
+    "harness:recovery": "bun scripts/harness.ts --map osm --hour 17.5 --minutes 8 --target 8000 --seed 1 --switch-hour 23.5 --switch-at 5 --switch-target 3672",
+    "harness:legacy": "bun scripts/harness.ts --map legacy --hour 17 --minutes 10 --target 1100 --seeds 5",
+    "harness:legacy:baseline": "bun scripts/harness.ts --map legacy --hour 17 --minutes 10 --target 1100 --seeds 5 --baseline none --json data/harness/baseline-legacy.json"
   },
   "dependencies": {
     "@fontsource/be-vietnam-pro": "^5.3.0",

@@ -1,0 +1,2812 @@
+{
+ "args": {
+  "map": "legacy",
+  "hour": 17,
+  "minutes": 5,
+  "density": 1,
+  "target": 1100,
+  "seed": null,
+  "seeds": 5,
+  "sweep": null,
+  "nref": 1600,
+  "jobs": 5,
+  "skipStatic": false,
+  "strictPerf": false,
+  "json": "data/harness/baseline-legacy.json"
+ },
+ "networkHash": null,
+ "networkHashMismatch": false,
+ "protocol": {
+  "locksMedianMax": 1,
+  "locksRef": 3,
+  "locksStress": 5,
+  "slopeFrom": 4,
+  "slopeTo": 10,
+  "slopeMin": -0.5,
+  "tputRefFrom": 3,
+  "tputRefTo": 5,
+  "tputLateFrom": 5,
+  "tputLateTo": 10,
+  "tputTol": 0.15,
+  "floorKmh": 10,
+  "legacyMedianKmh": 5.3,
+  "legacyMinKmh": 4.5,
+  "legacyReleasePct": 1.2
+ },
+ "seeds": [
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "suggestedNref": null,
+ "configs": [
+  {
+   "target": 1100,
+   "profile": "legacy",
+   "stats": {
+    "locks": {
+     "median": 17,
+     "min": 12,
+     "max": 23
+    },
+    "releases": {
+     "median": 17,
+     "min": 12,
+     "max": 23
+    },
+    "locksBroken": {
+     "median": 0,
+     "min": 0,
+     "max": 0
+    },
+    "monitorReleases": {
+     "median": 17,
+     "min": 12,
+     "max": 23
+    },
+    "releasePct": {
+     "median": 0.9259259259259258,
+     "min": 0.6012024048096193,
+     "max": 1.2339055793991416
+    },
+    "spawns": {
+     "median": 1979,
+     "min": 1836,
+     "max": 2009
+    },
+    "despawns": {
+     "median": 1486,
+     "min": 1346,
+     "max": 1530
+    },
+    "speedMean": {
+     "median": 7.802985958616655,
+     "min": 7.052358734737068,
+     "max": 8.136665473424797
+    },
+    "speedLate": {
+     "median": 6.079540607286181,
+     "min": 5.003657213782148,
+     "max": 6.565195004121892
+    },
+    "slope": null,
+    "tputRef": null,
+    "tputLate": null,
+    "tputRatio": null,
+    "starvedRoom": {
+     "median": 0,
+     "min": 0,
+     "max": 0
+    },
+    "starvedOld": {
+     "median": 0,
+     "min": 0,
+     "max": 0
+    },
+    "ringMaxStopT": {
+     "median": 17,
+     "min": 6.5,
+     "max": 86
+    },
+    "ringOver": {
+     "median": 0,
+     "min": 0,
+     "max": 5272
+    },
+    "countEnd": {
+     "median": 1073,
+     "min": 1043,
+     "max": 1098
+    },
+    "waitingEnd": {
+     "median": 728,
+     "min": 696,
+     "max": 824
+    },
+    "p95": {
+     "median": 6.203874999999243,
+     "min": 5.860250000000633,
+     "max": 6.447709000000032
+    }
+   },
+   "h2": {
+    "id": "H2",
+    "title": "Gridlock",
+    "status": "fail",
+    "summary": "[legacy, 5 seed] (a) release % median 0.93 max 1.23 (≤ 1.2) · (e) v̄ nửa sau median 6.08 min 5.00 (≥ 5.3 / 4.5) · (d) ring 45 s 3/5",
+    "details": [
+     "(a) 1/5 seed có release > 1.2 % spawn",
+     "(d) ring 45 s: 2/5 seed vi phạm"
+    ]
+   },
+   "passesRef": false,
+   "checkCounts": {
+    "H1": {
+     "pass": 5,
+     "fail": 0,
+     "warn": 0,
+     "skip": 0
+    },
+    "H2": {
+     "pass": 2,
+     "fail": 3,
+     "warn": 0,
+     "skip": 0
+    },
+    "H3": {
+     "pass": 1,
+     "fail": 0,
+     "warn": 0,
+     "skip": 4
+    },
+    "H4": {
+     "pass": 5,
+     "fail": 0,
+     "warn": 0,
+     "skip": 0
+    },
+    "H5": {
+     "pass": 0,
+     "fail": 0,
+     "warn": 0,
+     "skip": 5
+    },
+    "H6": {
+     "pass": 0,
+     "fail": 0,
+     "warn": 0,
+     "skip": 5
+    },
+    "H7": {
+     "pass": 0,
+     "fail": 0,
+     "warn": 5,
+     "skip": 0
+    },
+    "H8": {
+     "pass": 5,
+     "fail": 0,
+     "warn": 0,
+     "skip": 0
+    }
+   },
+   "runs": [
+    {
+     "args": {
+      "map": "legacy",
+      "hour": 17,
+      "minutes": 5,
+      "density": 1,
+      "target": 1100,
+      "seed": 1,
+      "seeds": null,
+      "sweep": null,
+      "nref": 1600,
+      "jobs": null,
+      "skipStatic": false,
+      "strictPerf": false,
+      "json": "/var/folders/1q/bvwn62jx2gj4nx1j77j0lkvm0000gn/T/harness-dhcJCF/t1100-s1.json"
+     },
+     "target": 1100,
+     "seed": 1,
+     "profile": "legacy",
+     "networkHash": null,
+     "populated": 600,
+     "kpiEnd": {
+      "count": 1073,
+      "avgKmh": 5.483847084675985,
+      "congestion": 84.89707624399682,
+      "waiting": 757,
+      "mix": [
+       567,
+       97,
+       289,
+       39,
+       30,
+       1,
+       0,
+       50
+      ],
+      "releases": 17,
+      "locksBroken": 0
+     },
+     "perf": {
+      "p50": 1.7339579999970738,
+      "p95": 6.447709000000032,
+      "max": 157.3152500000001,
+      "mean": 2.5911045452222345,
+      "budgetMs": 3
+     },
+     "metrics": {
+      "minutes": 5,
+      "spawns": 1836,
+      "despawns": 1346,
+      "releases": 17,
+      "locksBroken": 0,
+      "locks": 17,
+      "monitorReleases": 17,
+      "releasePct": 0.9259259259259258,
+      "speedPerMinute": [
+       13.7,
+       8.4,
+       6.4,
+       5,
+       4.5
+      ],
+      "despawnPerMinute": [
+       399,
+       281,
+       249,
+       211,
+       206
+      ],
+      "speedMeanKmh": 7.052358734737068,
+      "lateFromMinute": 2.5,
+      "lateSpeedKmh": 5.003657213782148,
+      "slope": null,
+      "tputRefMean": null,
+      "tputLateMean": null,
+      "tputRatio": null,
+      "starvedRoom": 0,
+      "starvedOld": 0,
+      "ringOver": 0,
+      "ringMaxStopT": 6.5
+     },
+     "checks": [
+      {
+       "id": "H1",
+       "title": "Bất biến dựng mạng",
+       "status": "pass",
+       "summary": "122 segment, 38 link, 17 nút, 6 đèn, 1 ring",
+       "details": []
+      },
+      {
+       "id": "H2",
+       "title": "Gridlock",
+       "status": "pass",
+       "summary": "[legacy] (a) ✓ release 17/1836 = 0.93 % (≤ 1.2 %) · (b) ? slope – km/h/phút (≥ -0.5) · despawn/phút –/– = – (±15 %) · (c) ✓ đói có chỗ ra 0 · (d) ✓ ring stopT>45s 0 mẫu (max 7 s) · (e) ✓ v̄ phút 2.5–5 = 5.00 km/h (≥ 4.5)",
+       "details": [
+        "(b) bỏ qua: cần chạy ≥ 10 phút",
+        "legacy: không áp slope/throughput (suy giảm có sẵn từ trước P2)",
+        "info (tiêu chí cũ): release 17/1836 = 0.93 % (cũ ≤ 2 %) · v̄ 5.00 (cũ ≥ 6) · đói theo định nghĩa cũ 0",
+        "info (đối chiếu): release theo diff-monitor 17 vs counter 17"
+       ]
+      },
+      {
+       "id": "H3",
+       "title": "Tất định",
+       "status": "pass",
+       "summary": "0→60 s, mưa bật ở step 4000, restore+replay ≡ run A ≡ instance mới (1054 xe, uid kế 1950, release 3, gỡ khoá 0)",
+       "details": []
+      },
+      {
+       "id": "H4",
+       "title": "Ngược chiều / hướng xe",
+       "status": "pass",
+       "summary": "0 vi phạm / 1800 lượt lấy mẫu",
+       "details": []
+      },
+      {
+       "id": "H5",
+       "title": "Đèn tín hiệu",
+       "status": "skip",
+       "summary": "chỉ chạy với --map osm",
+       "details": []
+      },
+      {
+       "id": "H6",
+       "title": "Vòng xoay",
+       "status": "skip",
+       "summary": "chỉ chạy với --map osm",
+       "details": []
+      },
+      {
+       "id": "H7",
+       "title": "Hiệu năng",
+       "status": "warn",
+       "summary": "p50 1.73 · p95 6.45 · max 157.32 ms/step (TB 2.59; ngân sách p95 ≤ 3)",
+       "details": [
+        "p95 6.45 ms > 3 ms (soft; dùng --strict-perf để chặn)"
+       ]
+      },
+      {
+       "id": "H8",
+       "title": "Báo cáo",
+       "status": "pass",
+       "summary": "spawn 1836 · despawn 1346 · release 17 · gỡ khoá 0 · link chưa ghé 0",
+       "details": []
+      }
+     ],
+     "report": {
+      "steps": 18000,
+      "seconds": 300,
+      "spawns": 1836,
+      "despawns": 1346,
+      "releases": 17,
+      "spawnByType": [
+       1153,
+       211,
+       332,
+       41,
+       32,
+       0,
+       0,
+       67
+      ],
+      "despawnByType": [
+       847,
+       158,
+       253,
+       27,
+       22,
+       5,
+       0,
+       34
+      ],
+      "despawnPerMinute": [
+       399,
+       281,
+       249,
+       211,
+       206
+      ],
+      "releaseByType": [
+       7,
+       0,
+       8,
+       0,
+       0,
+       0,
+       0,
+       2
+      ],
+      "spawnByPortal": [
+       {
+        "link": 37,
+        "portal": "pDS Tôn Đức Thắng",
+        "count": 293
+       },
+       {
+        "link": 34,
+        "portal": "pDN Tôn Đức Thắng",
+        "count": 232
+       },
+       {
+        "link": 33,
+        "portal": "pCS Đồng Khởi",
+        "count": 221
+       },
+       {
+        "link": 12,
+        "portal": "pBN Pasteur",
+        "count": 216
+       },
+       {
+        "link": 28,
+        "portal": "pCN Đồng Khởi",
+        "count": 216
+       },
+       {
+        "link": 25,
+        "portal": "pE Cầu Ba Son",
+        "count": 211
+       },
+       {
+        "link": 3,
+        "portal": "pRN Cách Mạng Tháng Tám",
+        "count": 145
+       },
+       {
+        "link": 19,
+        "portal": "pBS Pasteur",
+        "count": 133
+       },
+       {
+        "link": 5,
+        "portal": "pRS Trần Hưng Đạo",
+        "count": 100
+       },
+       {
+        "link": 1,
+        "portal": "pW Lê Lai",
+        "count": 69
+       }
+      ],
+      "despawnByPortal": [
+       {
+        "link": 36,
+        "portal": "pDS Tôn Đức Thắng",
+        "count": 195
+       },
+       {
+        "link": 24,
+        "portal": "pE Cầu Ba Son",
+        "count": 186
+       },
+       {
+        "link": 35,
+        "portal": "pDN Tôn Đức Thắng",
+        "count": 181
+       },
+       {
+        "link": 29,
+        "portal": "pCN Đồng Khởi",
+        "count": 160
+       },
+       {
+        "link": 32,
+        "portal": "pCS Đồng Khởi",
+        "count": 143
+       },
+       {
+        "link": 13,
+        "portal": "pBN Pasteur",
+        "count": 130
+       },
+       {
+        "link": 18,
+        "portal": "pBS Pasteur",
+        "count": 109
+       },
+       {
+        "link": 2,
+        "portal": "pRN Cách Mạng Tháng Tám",
+        "count": 91
+       },
+       {
+        "link": 4,
+        "portal": "pRS Trần Hưng Đạo",
+        "count": 80
+       },
+       {
+        "link": 0,
+        "portal": "pW Lê Lai",
+        "count": 71
+       }
+      ],
+      "releaseByJunction": [
+       {
+        "junction": "RB Vòng xoay Bến Thành",
+        "count": 7
+       },
+       {
+        "junction": "BS Giao lộ Pasteur – Hàm Nghi [đèn]",
+        "count": 7
+       },
+       {
+        "junction": "BN Giao lộ Pasteur – Lý Tự Trọng [đèn]",
+        "count": 2
+       },
+       {
+        "junction": "CN Giao lộ Đồng Khởi – Lý Tự Trọng [đèn]",
+        "count": 1
+       }
+      ],
+      "speedByTypePerMinute": [
+       [
+        17.1,
+        16.1,
+        9.3,
+        10.2,
+        9.7,
+        8.6,
+        null,
+        7
+       ],
+       [
+        11.5,
+        11.2,
+        4.2,
+        3,
+        4.7,
+        3.8,
+        null,
+        4.3
+       ],
+       [
+        8.6,
+        8.3,
+        3,
+        2.1,
+        3.4,
+        5,
+        null,
+        4.4
+       ],
+       [
+        6.4,
+        6.8,
+        2.5,
+        1.7,
+        1.8,
+        6.2,
+        null,
+        3.4
+       ],
+       [
+        5.9,
+        5.3,
+        2.2,
+        1.9,
+        2,
+        0.3,
+        null,
+        3.4
+       ]
+      ],
+      "speedAllPerMinute": [
+       13.7,
+       8.4,
+       6.4,
+       5,
+       4.5
+      ],
+      "worstStopLines": [
+       {
+        "link": 3,
+        "street": "Cách Mạng Tháng Tám",
+        "to": "RB Vòng xoay Bến Thành",
+        "signalised": false,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 254.1,
+        "maxQueue": 32,
+        "departures": 139,
+        "maxStarveS": 19
+       },
+       {
+        "link": 5,
+        "street": "Trần Hưng Đạo",
+        "to": "RB Vòng xoay Bến Thành",
+        "signalised": false,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 221.2,
+        "maxQueue": 28,
+        "departures": 97,
+        "maxStarveS": 37
+       },
+       {
+        "link": 21,
+        "street": "Lý Tự Trọng",
+        "to": "BN Giao lộ Pasteur – Lý Tự Trọng [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 197,
+        "maxQueue": 61,
+        "departures": 93,
+        "maxStarveS": 92
+       },
+       {
+        "link": 19,
+        "street": "Pasteur",
+        "to": "BS Giao lộ Pasteur – Hàm Nghi [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 195.4,
+        "maxQueue": 95,
+        "departures": 66,
+        "maxStarveS": 36
+       },
+       {
+        "link": 16,
+        "street": "Pasteur",
+        "to": "BS Giao lộ Pasteur – Hàm Nghi [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 192,
+        "maxQueue": 47,
+        "departures": 88,
+        "maxStarveS": 61
+       },
+       {
+        "link": 28,
+        "street": "Đồng Khởi",
+        "to": "CN Giao lộ Đồng Khởi – Lý Tự Trọng [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 177.5,
+        "maxQueue": 91,
+        "departures": 140,
+        "maxStarveS": 32
+       },
+       {
+        "link": 27,
+        "street": "Hàm Nghi",
+        "to": "BS Giao lộ Pasteur – Hàm Nghi [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 176.5,
+        "maxQueue": 54,
+        "departures": 87,
+        "maxStarveS": 31
+       },
+       {
+        "link": 25,
+        "street": "Cầu Ba Son",
+        "to": "DN Chân cầu Ba Son [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 172.5,
+        "maxQueue": 110,
+        "departures": 138,
+        "maxStarveS": 33
+       },
+       {
+        "link": 12,
+        "street": "Pasteur",
+        "to": "BN Giao lộ Pasteur – Lý Tự Trọng [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 147.2,
+        "maxQueue": 113,
+        "departures": 161,
+        "maxStarveS": 55
+       },
+       {
+        "link": 8,
+        "street": "Lê Thánh Tôn",
+        "to": "BN Giao lộ Pasteur – Lý Tự Trọng [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 119.4,
+        "maxQueue": 5,
+        "departures": 88,
+        "maxStarveS": 15
+       }
+      ],
+      "starved": [],
+      "starvedRoom": [],
+      "linksNeverVisited": [],
+      "rings": [
+       {
+        "ring": 0,
+        "name": "Vòng xoay Bến Thành",
+        "entries": 485,
+        "exits": 429,
+        "maxStopT": 6.5,
+        "stoppedOverLimit": 0
+       }
+      ],
+      "wrong": {
+       "onewayLeft": 0,
+       "twoWayLeftNonSwarm": 0,
+       "swarmWrongTOver": 0,
+       "headingBad": 0,
+       "onewayHeadingBad": 0,
+       "samples": 1800,
+       "swarmMaxOverS": 0,
+       "vehicles": {
+        "onewayLeft": 0,
+        "twoWayLeftNonSwarm": 0,
+        "swarmWrongTOver": 0,
+        "headingBad": 0,
+        "onewayHeadingBad": 0
+       },
+       "bySegment": [],
+       "examples": []
+      }
+     },
+     "warnings": []
+    },
+    {
+     "args": {
+      "map": "legacy",
+      "hour": 17,
+      "minutes": 5,
+      "density": 1,
+      "target": 1100,
+      "seed": 2,
+      "seeds": null,
+      "sweep": null,
+      "nref": 1600,
+      "jobs": null,
+      "skipStatic": true,
+      "strictPerf": false,
+      "json": "/var/folders/1q/bvwn62jx2gj4nx1j77j0lkvm0000gn/T/harness-dhcJCF/t1100-s2.json"
+     },
+     "target": 1100,
+     "seed": 2,
+     "profile": "legacy",
+     "networkHash": null,
+     "populated": 606,
+     "kpiEnd": {
+      "count": 1043,
+      "avgKmh": 6.363957969688156,
+      "congestion": 82.46904110279229,
+      "waiting": 700,
+      "mix": [
+       539,
+       98,
+       298,
+       40,
+       25,
+       2,
+       0,
+       41
+      ],
+      "releases": 12,
+      "locksBroken": 0
+     },
+     "perf": {
+      "p50": 1.5802499999990687,
+      "p95": 5.860250000000633,
+      "max": 296.7092090000001,
+      "mean": 2.437262750555548,
+      "budgetMs": 3
+     },
+     "metrics": {
+      "minutes": 5,
+      "spawns": 1979,
+      "despawns": 1530,
+      "releases": 12,
+      "locksBroken": 0,
+      "locks": 12,
+      "monitorReleases": 12,
+      "releasePct": 0.6063668519454269,
+      "speedPerMinute": [
+       13.8,
+       9,
+       7.8,
+       6.1,
+       6.2
+      ],
+      "despawnPerMinute": [
+       406,
+       286,
+       303,
+       244,
+       291
+      ],
+      "speedMeanKmh": 8.12148533294306,
+      "lateFromMinute": 2.5,
+      "lateSpeedKmh": 6.383725190249418,
+      "slope": null,
+      "tputRefMean": null,
+      "tputLateMean": null,
+      "tputRatio": null,
+      "starvedRoom": 0,
+      "starvedOld": 0,
+      "ringOver": 1294,
+      "ringMaxStopT": 56.5
+     },
+     "checks": [
+      {
+       "id": "H1",
+       "title": "Bất biến dựng mạng",
+       "status": "pass",
+       "summary": "122 segment, 38 link, 17 nút, 6 đèn, 1 ring",
+       "details": []
+      },
+      {
+       "id": "H2",
+       "title": "Gridlock",
+       "status": "fail",
+       "summary": "[legacy] (a) ✓ release 12/1979 = 0.61 % (≤ 1.2 %) · (b) ? slope – km/h/phút (≥ -0.5) · despawn/phút –/– = – (±15 %) · (c) ✓ đói có chỗ ra 0 · (d) ✗ ring stopT>45s 1294 mẫu (max 57 s) · (e) ✓ v̄ phút 2.5–5 = 6.38 km/h (≥ 4.5)",
+       "details": [
+        "(d) xe trên cung ring đứng > 45 s (1294 mẫu-bước, max 57 s)",
+        "(b) bỏ qua: cần chạy ≥ 10 phút",
+        "legacy: không áp slope/throughput (suy giảm có sẵn từ trước P2)",
+        "info (tiêu chí cũ): release 12/1979 = 0.61 % (cũ ≤ 2 %) · v̄ 6.38 (cũ ≥ 6) · đói theo định nghĩa cũ 0",
+        "info (đối chiếu): release theo diff-monitor 12 vs counter 12"
+       ]
+      },
+      {
+       "id": "H3",
+       "title": "Tất định",
+       "status": "skip",
+       "summary": "chạy ở seed đầu của mỗi cấu hình",
+       "details": []
+      },
+      {
+       "id": "H4",
+       "title": "Ngược chiều / hướng xe",
+       "status": "pass",
+       "summary": "0 vi phạm / 1800 lượt lấy mẫu",
+       "details": []
+      },
+      {
+       "id": "H5",
+       "title": "Đèn tín hiệu",
+       "status": "skip",
+       "summary": "chỉ chạy với --map osm",
+       "details": []
+      },
+      {
+       "id": "H6",
+       "title": "Vòng xoay",
+       "status": "skip",
+       "summary": "chỉ chạy với --map osm",
+       "details": []
+      },
+      {
+       "id": "H7",
+       "title": "Hiệu năng",
+       "status": "warn",
+       "summary": "p50 1.58 · p95 5.86 · max 296.71 ms/step (TB 2.44; ngân sách p95 ≤ 3)",
+       "details": [
+        "p95 5.86 ms > 3 ms (soft; dùng --strict-perf để chặn)"
+       ]
+      },
+      {
+       "id": "H8",
+       "title": "Báo cáo",
+       "status": "pass",
+       "summary": "spawn 1979 · despawn 1530 · release 12 · gỡ khoá 0 · link chưa ghé 0",
+       "details": []
+      }
+     ],
+     "report": {
+      "steps": 18000,
+      "seconds": 300,
+      "spawns": 1979,
+      "despawns": 1530,
+      "releases": 12,
+      "spawnByType": [
+       1243,
+       234,
+       362,
+       49,
+       30,
+       0,
+       0,
+       61
+      ],
+      "despawnByType": [
+       984,
+       185,
+       265,
+       32,
+       24,
+       4,
+       0,
+       36
+      ],
+      "despawnPerMinute": [
+       406,
+       286,
+       303,
+       244,
+       291
+      ],
+      "releaseByType": [
+       3,
+       0,
+       7,
+       0,
+       1,
+       0,
+       0,
+       1
+      ],
+      "spawnByPortal": [
+       {
+        "link": 37,
+        "portal": "pDS Tôn Đức Thắng",
+        "count": 279
+       },
+       {
+        "link": 33,
+        "portal": "pCS Đồng Khởi",
+        "count": 273
+       },
+       {
+        "link": 28,
+        "portal": "pCN Đồng Khởi",
+        "count": 263
+       },
+       {
+        "link": 34,
+        "portal": "pDN Tôn Đức Thắng",
+        "count": 255
+       },
+       {
+        "link": 25,
+        "portal": "pE Cầu Ba Son",
+        "count": 238
+       },
+       {
+        "link": 19,
+        "portal": "pBS Pasteur",
+        "count": 213
+       },
+       {
+        "link": 12,
+        "portal": "pBN Pasteur",
+        "count": 170
+       },
+       {
+        "link": 3,
+        "portal": "pRN Cách Mạng Tháng Tám",
+        "count": 113
+       },
+       {
+        "link": 1,
+        "portal": "pW Lê Lai",
+        "count": 100
+       },
+       {
+        "link": 5,
+        "portal": "pRS Trần Hưng Đạo",
+        "count": 75
+       }
+      ],
+      "despawnByPortal": [
+       {
+        "link": 24,
+        "portal": "pE Cầu Ba Son",
+        "count": 216
+       },
+       {
+        "link": 36,
+        "portal": "pDS Tôn Đức Thắng",
+        "count": 188
+       },
+       {
+        "link": 29,
+        "portal": "pCN Đồng Khởi",
+        "count": 185
+       },
+       {
+        "link": 35,
+        "portal": "pDN Tôn Đức Thắng",
+        "count": 180
+       },
+       {
+        "link": 13,
+        "portal": "pBN Pasteur",
+        "count": 179
+       },
+       {
+        "link": 32,
+        "portal": "pCS Đồng Khởi",
+        "count": 175
+       },
+       {
+        "link": 18,
+        "portal": "pBS Pasteur",
+        "count": 147
+       },
+       {
+        "link": 4,
+        "portal": "pRS Trần Hưng Đạo",
+        "count": 94
+       },
+       {
+        "link": 2,
+        "portal": "pRN Cách Mạng Tháng Tám",
+        "count": 92
+       },
+       {
+        "link": 0,
+        "portal": "pW Lê Lai",
+        "count": 74
+       }
+      ],
+      "releaseByJunction": [
+       {
+        "junction": "RB Vòng xoay Bến Thành",
+        "count": 12
+       }
+      ],
+      "speedByTypePerMinute": [
+       [
+        17.3,
+        17.1,
+        9.3,
+        9.5,
+        8.9,
+        7.6,
+        null,
+        8.5
+       ],
+       [
+        12,
+        11,
+        4.4,
+        4.7,
+        4.8,
+        2.2,
+        null,
+        6
+       ],
+       [
+        10.7,
+        10.7,
+        3.2,
+        4.3,
+        2.5,
+        2.9,
+        null,
+        4.6
+       ],
+       [
+        8,
+        8,
+        2.9,
+        2.7,
+        2.7,
+        2.4,
+        null,
+        4.4
+       ],
+       [
+        8,
+        8.3,
+        3.2,
+        2.8,
+        1.2,
+        7.6,
+        null,
+        4.5
+       ]
+      ],
+      "speedAllPerMinute": [
+       13.8,
+       9,
+       7.8,
+       6.1,
+       6.2
+      ],
+      "worstStopLines": [
+       {
+        "link": 25,
+        "street": "Cầu Ba Son",
+        "to": "DN Chân cầu Ba Son [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 247.5,
+        "maxQueue": 139,
+        "departures": 126,
+        "maxStarveS": 31
+       },
+       {
+        "link": 3,
+        "street": "Cách Mạng Tháng Tám",
+        "to": "RB Vòng xoay Bến Thành",
+        "signalised": false,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 179.2,
+        "maxQueue": 53,
+        "departures": 106,
+        "maxStarveS": 34
+       },
+       {
+        "link": 12,
+        "street": "Pasteur",
+        "to": "BN Giao lộ Pasteur – Lý Tự Trọng [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 157.8,
+        "maxQueue": 82,
+        "departures": 126,
+        "maxStarveS": 52
+       },
+       {
+        "link": 11,
+        "street": "Hàm Nghi",
+        "to": "RB Vòng xoay Bến Thành",
+        "signalised": false,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 114,
+        "maxQueue": 16,
+        "departures": 108,
+        "maxStarveS": 22
+       },
+       {
+        "link": 16,
+        "street": "Pasteur",
+        "to": "BS Giao lộ Pasteur – Hàm Nghi [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 102.5,
+        "maxQueue": 21,
+        "departures": 129,
+        "maxStarveS": 30
+       },
+       {
+        "link": 19,
+        "street": "Pasteur",
+        "to": "BS Giao lộ Pasteur – Hàm Nghi [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 98.9,
+        "maxQueue": 90,
+        "departures": 157,
+        "maxStarveS": 28
+       },
+       {
+        "link": 1,
+        "street": "Lê Lai",
+        "to": "RB Vòng xoay Bến Thành",
+        "signalised": false,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 96.9,
+        "maxQueue": 18,
+        "departures": 92,
+        "maxStarveS": 74
+       },
+       {
+        "link": 5,
+        "street": "Trần Hưng Đạo",
+        "to": "RB Vòng xoay Bến Thành",
+        "signalised": false,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 94.9,
+        "maxQueue": 28,
+        "departures": 72,
+        "maxStarveS": 40
+       },
+       {
+        "link": 21,
+        "street": "Lý Tự Trọng",
+        "to": "BN Giao lộ Pasteur – Lý Tự Trọng [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 94.4,
+        "maxQueue": 24,
+        "departures": 171,
+        "maxStarveS": 14
+       },
+       {
+        "link": 9,
+        "street": "Lê Thánh Tôn",
+        "to": "RB Vòng xoay Bến Thành",
+        "signalised": false,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 93,
+        "maxQueue": 31,
+        "departures": 78,
+        "maxStarveS": 65
+       }
+      ],
+      "starved": [],
+      "starvedRoom": [],
+      "linksNeverVisited": [],
+      "rings": [
+       {
+        "ring": 0,
+        "name": "Vòng xoay Bến Thành",
+        "entries": 524,
+        "exits": 439,
+        "maxStopT": 56.5,
+        "stoppedOverLimit": 1294
+       }
+      ],
+      "wrong": {
+       "onewayLeft": 0,
+       "twoWayLeftNonSwarm": 0,
+       "swarmWrongTOver": 0,
+       "headingBad": 0,
+       "onewayHeadingBad": 0,
+       "samples": 1800,
+       "swarmMaxOverS": 0,
+       "vehicles": {
+        "onewayLeft": 0,
+        "twoWayLeftNonSwarm": 0,
+        "swarmWrongTOver": 0,
+        "headingBad": 0,
+        "onewayHeadingBad": 0
+       },
+       "bySegment": [],
+       "examples": []
+      }
+     },
+     "warnings": []
+    },
+    {
+     "args": {
+      "map": "legacy",
+      "hour": 17,
+      "minutes": 5,
+      "density": 1,
+      "target": 1100,
+      "seed": 3,
+      "seeds": null,
+      "sweep": null,
+      "nref": 1600,
+      "jobs": null,
+      "skipStatic": true,
+      "strictPerf": false,
+      "json": "/var/folders/1q/bvwn62jx2gj4nx1j77j0lkvm0000gn/T/harness-dhcJCF/t1100-s3.json"
+     },
+     "target": 1100,
+     "seed": 3,
+     "profile": "legacy",
+     "networkHash": null,
+     "populated": 599,
+     "kpiEnd": {
+      "count": 1053,
+      "avgKmh": 6.27557946548643,
+      "congestion": 82.69595814817417,
+      "waiting": 696,
+      "mix": [
+       545,
+       93,
+       293,
+       41,
+       32,
+       2,
+       0,
+       47
+      ],
+      "releases": 23,
+      "locksBroken": 0
+     },
+     "perf": {
+      "p50": 1.6748750000006112,
+      "p95": 6.203874999999243,
+      "max": 247.20191699999987,
+      "mean": 2.5448871582777914,
+      "budgetMs": 3
+     },
+     "metrics": {
+      "minutes": 5,
+      "spawns": 1864,
+      "despawns": 1387,
+      "releases": 23,
+      "locksBroken": 0,
+      "locks": 23,
+      "monitorReleases": 23,
+      "releasePct": 1.2339055793991416,
+      "speedPerMinute": [
+       13.3,
+       8.1,
+       6.5,
+       4.9,
+       5.2
+      ],
+      "despawnPerMinute": [
+       385,
+       270,
+       308,
+       219,
+       205
+      ],
+      "speedMeanKmh": 7.161921432501506,
+      "lateFromMinute": 2.5,
+      "lateSpeedKmh": 5.238050178017709,
+      "slope": null,
+      "tputRefMean": null,
+      "tputLateMean": null,
+      "tputRatio": null,
+      "starvedRoom": 0,
+      "starvedOld": 0,
+      "ringOver": 0,
+      "ringMaxStopT": 9.6
+     },
+     "checks": [
+      {
+       "id": "H1",
+       "title": "Bất biến dựng mạng",
+       "status": "pass",
+       "summary": "122 segment, 38 link, 17 nút, 6 đèn, 1 ring",
+       "details": []
+      },
+      {
+       "id": "H2",
+       "title": "Gridlock",
+       "status": "fail",
+       "summary": "[legacy] (a) ✗ release 23/1864 = 1.23 % (≤ 1.2 %) · (b) ? slope – km/h/phút (≥ -0.5) · despawn/phút –/– = – (±15 %) · (c) ✓ đói có chỗ ra 0 · (d) ✓ ring stopT>45s 0 mẫu (max 10 s) · (e) ✓ v̄ phút 2.5–5 = 5.24 km/h (≥ 4.5)",
+       "details": [
+        "(a) release 23/1864 spawn = 1.23 % > 1.2 %",
+        "(b) bỏ qua: cần chạy ≥ 10 phút",
+        "legacy: không áp slope/throughput (suy giảm có sẵn từ trước P2)",
+        "info (tiêu chí cũ): release 23/1864 = 1.23 % (cũ ≤ 2 %) · v̄ 5.24 (cũ ≥ 6) · đói theo định nghĩa cũ 0",
+        "info (đối chiếu): release theo diff-monitor 23 vs counter 23"
+       ]
+      },
+      {
+       "id": "H3",
+       "title": "Tất định",
+       "status": "skip",
+       "summary": "chạy ở seed đầu của mỗi cấu hình",
+       "details": []
+      },
+      {
+       "id": "H4",
+       "title": "Ngược chiều / hướng xe",
+       "status": "pass",
+       "summary": "0 vi phạm / 1800 lượt lấy mẫu",
+       "details": []
+      },
+      {
+       "id": "H5",
+       "title": "Đèn tín hiệu",
+       "status": "skip",
+       "summary": "chỉ chạy với --map osm",
+       "details": []
+      },
+      {
+       "id": "H6",
+       "title": "Vòng xoay",
+       "status": "skip",
+       "summary": "chỉ chạy với --map osm",
+       "details": []
+      },
+      {
+       "id": "H7",
+       "title": "Hiệu năng",
+       "status": "warn",
+       "summary": "p50 1.67 · p95 6.20 · max 247.20 ms/step (TB 2.54; ngân sách p95 ≤ 3)",
+       "details": [
+        "p95 6.20 ms > 3 ms (soft; dùng --strict-perf để chặn)"
+       ]
+      },
+      {
+       "id": "H8",
+       "title": "Báo cáo",
+       "status": "pass",
+       "summary": "spawn 1864 · despawn 1387 · release 23 · gỡ khoá 0 · link chưa ghé 0",
+       "details": []
+      }
+     ],
+     "report": {
+      "steps": 18000,
+      "seconds": 300,
+      "spawns": 1864,
+      "despawns": 1387,
+      "releases": 23,
+      "spawnByType": [
+       1203,
+       218,
+       310,
+       40,
+       32,
+       0,
+       0,
+       61
+      ],
+      "despawnByType": [
+       906,
+       167,
+       234,
+       23,
+       22,
+       2,
+       0,
+       33
+      ],
+      "despawnPerMinute": [
+       385,
+       270,
+       308,
+       219,
+       205
+      ],
+      "releaseByType": [
+       13,
+       1,
+       5,
+       1,
+       1,
+       0,
+       0,
+       2
+      ],
+      "spawnByPortal": [
+       {
+        "link": 37,
+        "portal": "pDS Tôn Đức Thắng",
+        "count": 295
+       },
+       {
+        "link": 33,
+        "portal": "pCS Đồng Khởi",
+        "count": 273
+       },
+       {
+        "link": 34,
+        "portal": "pDN Tôn Đức Thắng",
+        "count": 217
+       },
+       {
+        "link": 19,
+        "portal": "pBS Pasteur",
+        "count": 201
+       },
+       {
+        "link": 25,
+        "portal": "pE Cầu Ba Son",
+        "count": 193
+       },
+       {
+        "link": 12,
+        "portal": "pBN Pasteur",
+        "count": 153
+       },
+       {
+        "link": 5,
+        "portal": "pRS Trần Hưng Đạo",
+        "count": 149
+       },
+       {
+        "link": 28,
+        "portal": "pCN Đồng Khởi",
+        "count": 141
+       },
+       {
+        "link": 1,
+        "portal": "pW Lê Lai",
+        "count": 137
+       },
+       {
+        "link": 3,
+        "portal": "pRN Cách Mạng Tháng Tám",
+        "count": 105
+       }
+      ],
+      "despawnByPortal": [
+       {
+        "link": 24,
+        "portal": "pE Cầu Ba Son",
+        "count": 197
+       },
+       {
+        "link": 35,
+        "portal": "pDN Tôn Đức Thắng",
+        "count": 186
+       },
+       {
+        "link": 36,
+        "portal": "pDS Tôn Đức Thắng",
+        "count": 177
+       },
+       {
+        "link": 29,
+        "portal": "pCN Đồng Khởi",
+        "count": 152
+       },
+       {
+        "link": 13,
+        "portal": "pBN Pasteur",
+        "count": 147
+       },
+       {
+        "link": 32,
+        "portal": "pCS Đồng Khởi",
+        "count": 145
+       },
+       {
+        "link": 18,
+        "portal": "pBS Pasteur",
+        "count": 120
+       },
+       {
+        "link": 2,
+        "portal": "pRN Cách Mạng Tháng Tám",
+        "count": 107
+       },
+       {
+        "link": 4,
+        "portal": "pRS Trần Hưng Đạo",
+        "count": 83
+       },
+       {
+        "link": 0,
+        "portal": "pW Lê Lai",
+        "count": 73
+       }
+      ],
+      "releaseByJunction": [
+       {
+        "junction": "RB Vòng xoay Bến Thành",
+        "count": 18
+       },
+       {
+        "junction": "BN Giao lộ Pasteur – Lý Tự Trọng [đèn]",
+        "count": 3
+       },
+       {
+        "junction": "BS Giao lộ Pasteur – Hàm Nghi [đèn]",
+        "count": 2
+       }
+      ],
+      "speedByTypePerMinute": [
+       [
+        16.9,
+        16,
+        9.1,
+        8,
+        7.8,
+        5.1,
+        null,
+        7.8
+       ],
+       [
+        11.2,
+        11.2,
+        3.4,
+        3,
+        4.1,
+        0.2,
+        null,
+        4.6
+       ],
+       [
+        9.1,
+        8.7,
+        2.6,
+        1.9,
+        1.9,
+        0.1,
+        null,
+        3.8
+       ],
+       [
+        6.6,
+        7.6,
+        2,
+        1.9,
+        1.7,
+        0,
+        null,
+        3.1
+       ],
+       [
+        7,
+        7.3,
+        2.3,
+        2.4,
+        2.8,
+        0,
+        null,
+        3
+       ]
+      ],
+      "speedAllPerMinute": [
+       13.3,
+       8.1,
+       6.5,
+       4.9,
+       5.2
+      ],
+      "worstStopLines": [
+       {
+        "link": 28,
+        "street": "Đồng Khởi",
+        "to": "CN Giao lộ Đồng Khởi – Lý Tự Trọng [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 218.6,
+        "maxQueue": 67,
+        "departures": 104,
+        "maxStarveS": 82
+       },
+       {
+        "link": 11,
+        "street": "Hàm Nghi",
+        "to": "RB Vòng xoay Bến Thành",
+        "signalised": false,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 209.6,
+        "maxQueue": 13,
+        "departures": 84,
+        "maxStarveS": 28
+       },
+       {
+        "link": 5,
+        "street": "Trần Hưng Đạo",
+        "to": "RB Vòng xoay Bến Thành",
+        "signalised": false,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 186.3,
+        "maxQueue": 46,
+        "departures": 129,
+        "maxStarveS": 23
+       },
+       {
+        "link": 12,
+        "street": "Pasteur",
+        "to": "BN Giao lộ Pasteur – Lý Tự Trọng [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 158.6,
+        "maxQueue": 85,
+        "departures": 82,
+        "maxStarveS": 90
+       },
+       {
+        "link": 3,
+        "street": "Cách Mạng Tháng Tám",
+        "to": "RB Vòng xoay Bến Thành",
+        "signalised": false,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 151.8,
+        "maxQueue": 28,
+        "departures": 100,
+        "maxStarveS": 45
+       },
+       {
+        "link": 17,
+        "street": "Pasteur",
+        "to": "BM Giao lộ Lê Lợi – Pasteur [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 137.3,
+        "maxQueue": 32,
+        "departures": 101,
+        "maxStarveS": 89
+       },
+       {
+        "link": 21,
+        "street": "Lý Tự Trọng",
+        "to": "BN Giao lộ Pasteur – Lý Tự Trọng [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 131.8,
+        "maxQueue": 24,
+        "departures": 122,
+        "maxStarveS": 35
+       },
+       {
+        "link": 14,
+        "street": "Pasteur",
+        "to": "BM Giao lộ Lê Lợi – Pasteur [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 121.4,
+        "maxQueue": 19,
+        "departures": 112,
+        "maxStarveS": 26
+       },
+       {
+        "link": 19,
+        "street": "Pasteur",
+        "to": "BS Giao lộ Pasteur – Hàm Nghi [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 116.2,
+        "maxQueue": 90,
+        "departures": 133,
+        "maxStarveS": 34
+       },
+       {
+        "link": 16,
+        "street": "Pasteur",
+        "to": "BS Giao lộ Pasteur – Hàm Nghi [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 106.9,
+        "maxQueue": 34,
+        "departures": 95,
+        "maxStarveS": 32
+       }
+      ],
+      "starved": [],
+      "starvedRoom": [],
+      "linksNeverVisited": [],
+      "rings": [
+       {
+        "ring": 0,
+        "name": "Vòng xoay Bến Thành",
+        "entries": 572,
+        "exits": 482,
+        "maxStopT": 9.6,
+        "stoppedOverLimit": 0
+       }
+      ],
+      "wrong": {
+       "onewayLeft": 0,
+       "twoWayLeftNonSwarm": 0,
+       "swarmWrongTOver": 0,
+       "headingBad": 0,
+       "onewayHeadingBad": 0,
+       "samples": 1800,
+       "swarmMaxOverS": 0,
+       "vehicles": {
+        "onewayLeft": 0,
+        "twoWayLeftNonSwarm": 0,
+        "swarmWrongTOver": 0,
+        "headingBad": 0,
+        "onewayHeadingBad": 0
+       },
+       "bySegment": [],
+       "examples": []
+      }
+     },
+     "warnings": []
+    },
+    {
+     "args": {
+      "map": "legacy",
+      "hour": 17,
+      "minutes": 5,
+      "density": 1,
+      "target": 1100,
+      "seed": 4,
+      "seeds": null,
+      "sweep": null,
+      "nref": 1600,
+      "jobs": null,
+      "skipStatic": true,
+      "strictPerf": false,
+      "json": "/var/folders/1q/bvwn62jx2gj4nx1j77j0lkvm0000gn/T/harness-dhcJCF/t1100-s4.json"
+     },
+     "target": 1100,
+     "seed": 4,
+     "profile": "legacy",
+     "networkHash": null,
+     "populated": 594,
+     "kpiEnd": {
+      "count": 1082,
+      "avgKmh": 5.270932661172135,
+      "congestion": 85.27062320087873,
+      "waiting": 728,
+      "mix": [
+       549,
+       103,
+       303,
+       39,
+       31,
+       2,
+       0,
+       55
+      ],
+      "releases": 12,
+      "locksBroken": 0
+     },
+     "perf": {
+      "p50": 1.6086670000004233,
+      "p95": 6.374833000001672,
+      "max": 311.03083300000026,
+      "mean": 2.482055133166675,
+      "budgetMs": 3
+     },
+     "metrics": {
+      "minutes": 5,
+      "spawns": 1996,
+      "despawns": 1496,
+      "releases": 12,
+      "locksBroken": 0,
+      "locks": 12,
+      "monitorReleases": 12,
+      "releasePct": 0.6012024048096193,
+      "speedPerMinute": [
+       13.4,
+       8.9,
+       7.9,
+       6.6,
+       5.9
+      ],
+      "despawnPerMinute": [
+       383,
+       289,
+       294,
+       278,
+       252
+      ],
+      "speedMeanKmh": 8.136665473424797,
+      "lateFromMinute": 2.5,
+      "lateSpeedKmh": 6.565195004121892,
+      "slope": null,
+      "tputRefMean": null,
+      "tputLateMean": null,
+      "tputRatio": null,
+      "starvedRoom": 0,
+      "starvedOld": 0,
+      "ringOver": 5272,
+      "ringMaxStopT": 86
+     },
+     "checks": [
+      {
+       "id": "H1",
+       "title": "Bất biến dựng mạng",
+       "status": "pass",
+       "summary": "122 segment, 38 link, 17 nút, 6 đèn, 1 ring",
+       "details": []
+      },
+      {
+       "id": "H2",
+       "title": "Gridlock",
+       "status": "fail",
+       "summary": "[legacy] (a) ✓ release 12/1996 = 0.60 % (≤ 1.2 %) · (b) ? slope – km/h/phút (≥ -0.5) · despawn/phút –/– = – (±15 %) · (c) ✓ đói có chỗ ra 0 · (d) ✗ ring stopT>45s 5272 mẫu (max 86 s) · (e) ✓ v̄ phút 2.5–5 = 6.57 km/h (≥ 4.5)",
+       "details": [
+        "(d) xe trên cung ring đứng > 45 s (5272 mẫu-bước, max 86 s)",
+        "(b) bỏ qua: cần chạy ≥ 10 phút",
+        "legacy: không áp slope/throughput (suy giảm có sẵn từ trước P2)",
+        "info (tiêu chí cũ): release 12/1996 = 0.60 % (cũ ≤ 2 %) · v̄ 6.57 (cũ ≥ 6) · đói theo định nghĩa cũ 0",
+        "info (đối chiếu): release theo diff-monitor 12 vs counter 12"
+       ]
+      },
+      {
+       "id": "H3",
+       "title": "Tất định",
+       "status": "skip",
+       "summary": "chạy ở seed đầu của mỗi cấu hình",
+       "details": []
+      },
+      {
+       "id": "H4",
+       "title": "Ngược chiều / hướng xe",
+       "status": "pass",
+       "summary": "0 vi phạm / 1800 lượt lấy mẫu",
+       "details": []
+      },
+      {
+       "id": "H5",
+       "title": "Đèn tín hiệu",
+       "status": "skip",
+       "summary": "chỉ chạy với --map osm",
+       "details": []
+      },
+      {
+       "id": "H6",
+       "title": "Vòng xoay",
+       "status": "skip",
+       "summary": "chỉ chạy với --map osm",
+       "details": []
+      },
+      {
+       "id": "H7",
+       "title": "Hiệu năng",
+       "status": "warn",
+       "summary": "p50 1.61 · p95 6.37 · max 311.03 ms/step (TB 2.48; ngân sách p95 ≤ 3)",
+       "details": [
+        "p95 6.37 ms > 3 ms (soft; dùng --strict-perf để chặn)"
+       ]
+      },
+      {
+       "id": "H8",
+       "title": "Báo cáo",
+       "status": "pass",
+       "summary": "spawn 1996 · despawn 1496 · release 12 · gỡ khoá 0 · link chưa ghé 0",
+       "details": []
+      }
+     ],
+     "report": {
+      "steps": 18000,
+      "seconds": 300,
+      "spawns": 1996,
+      "despawns": 1496,
+      "releases": 12,
+      "spawnByType": [
+       1282,
+       224,
+       345,
+       43,
+       36,
+       0,
+       0,
+       66
+      ],
+      "despawnByType": [
+       992,
+       164,
+       250,
+       28,
+       28,
+       4,
+       0,
+       30
+      ],
+      "despawnPerMinute": [
+       383,
+       289,
+       294,
+       278,
+       252
+      ],
+      "releaseByType": [
+       4,
+       2,
+       3,
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "spawnByPortal": [
+       {
+        "link": 37,
+        "portal": "pDS Tôn Đức Thắng",
+        "count": 300
+       },
+       {
+        "link": 33,
+        "portal": "pCS Đồng Khởi",
+        "count": 277
+       },
+       {
+        "link": 34,
+        "portal": "pDN Tôn Đức Thắng",
+        "count": 247
+       },
+       {
+        "link": 25,
+        "portal": "pE Cầu Ba Son",
+        "count": 227
+       },
+       {
+        "link": 19,
+        "portal": "pBS Pasteur",
+        "count": 223
+       },
+       {
+        "link": 12,
+        "portal": "pBN Pasteur",
+        "count": 207
+       },
+       {
+        "link": 28,
+        "portal": "pCN Đồng Khởi",
+        "count": 189
+       },
+       {
+        "link": 3,
+        "portal": "pRN Cách Mạng Tháng Tám",
+        "count": 132
+       },
+       {
+        "link": 5,
+        "portal": "pRS Trần Hưng Đạo",
+        "count": 112
+       },
+       {
+        "link": 1,
+        "portal": "pW Lê Lai",
+        "count": 82
+       }
+      ],
+      "despawnByPortal": [
+       {
+        "link": 36,
+        "portal": "pDS Tôn Đức Thắng",
+        "count": 216
+       },
+       {
+        "link": 24,
+        "portal": "pE Cầu Ba Son",
+        "count": 184
+       },
+       {
+        "link": 35,
+        "portal": "pDN Tôn Đức Thắng",
+        "count": 176
+       },
+       {
+        "link": 29,
+        "portal": "pCN Đồng Khởi",
+        "count": 168
+       },
+       {
+        "link": 13,
+        "portal": "pBN Pasteur",
+        "count": 166
+       },
+       {
+        "link": 18,
+        "portal": "pBS Pasteur",
+        "count": 159
+       },
+       {
+        "link": 32,
+        "portal": "pCS Đồng Khởi",
+        "count": 149
+       },
+       {
+        "link": 2,
+        "portal": "pRN Cách Mạng Tháng Tám",
+        "count": 95
+       },
+       {
+        "link": 4,
+        "portal": "pRS Trần Hưng Đạo",
+        "count": 95
+       },
+       {
+        "link": 0,
+        "portal": "pW Lê Lai",
+        "count": 88
+       }
+      ],
+      "releaseByJunction": [
+       {
+        "junction": "RB Vòng xoay Bến Thành",
+        "count": 8
+       },
+       {
+        "junction": "BN Giao lộ Pasteur – Lý Tự Trọng [đèn]",
+        "count": 3
+       },
+       {
+        "junction": "CS Giao lộ Đồng Khởi – Hàm Nghi [đèn]",
+        "count": 1
+       }
+      ],
+      "speedByTypePerMinute": [
+       [
+        17.1,
+        16.8,
+        9,
+        8.7,
+        9.1,
+        7.7,
+        null,
+        7.8
+       ],
+       [
+        12.3,
+        12.2,
+        4.3,
+        3.2,
+        2.9,
+        2.7,
+        null,
+        5.8
+       ],
+       [
+        10.6,
+        9.7,
+        4,
+        3.2,
+        3.4,
+        5.5,
+        null,
+        4.3
+       ],
+       [
+        9.2,
+        9.4,
+        2,
+        2.8,
+        2.3,
+        2.3,
+        null,
+        3.4
+       ],
+       [
+        8.2,
+        8.6,
+        2.1,
+        2,
+        2.5,
+        0.6,
+        null,
+        3.1
+       ]
+      ],
+      "speedAllPerMinute": [
+       13.4,
+       8.9,
+       7.9,
+       6.6,
+       5.9
+      ],
+      "worstStopLines": [
+       {
+        "link": 3,
+        "street": "Cách Mạng Tháng Tám",
+        "to": "RB Vòng xoay Bến Thành",
+        "signalised": false,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 199.6,
+        "maxQueue": 28,
+        "departures": 130,
+        "maxStarveS": 34
+       },
+       {
+        "link": 21,
+        "street": "Lý Tự Trọng",
+        "to": "BN Giao lộ Pasteur – Lý Tự Trọng [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 194.9,
+        "maxQueue": 42,
+        "departures": 144,
+        "maxStarveS": 25
+       },
+       {
+        "link": 9,
+        "street": "Lê Thánh Tôn",
+        "to": "RB Vòng xoay Bến Thành",
+        "signalised": false,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 138.8,
+        "maxQueue": 28,
+        "departures": 104,
+        "maxStarveS": 35
+       },
+       {
+        "link": 15,
+        "street": "Pasteur",
+        "to": "BN Giao lộ Pasteur – Lý Tự Trọng [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 127.4,
+        "maxQueue": 31,
+        "departures": 145,
+        "maxStarveS": 32
+       },
+       {
+        "link": 12,
+        "street": "Pasteur",
+        "to": "BN Giao lộ Pasteur – Lý Tự Trọng [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 127,
+        "maxQueue": 72,
+        "departures": 160,
+        "maxStarveS": 28
+       },
+       {
+        "link": 1,
+        "street": "Lê Lai",
+        "to": "RB Vòng xoay Bến Thành",
+        "signalised": false,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 122.8,
+        "maxQueue": 19,
+        "departures": 68,
+        "maxStarveS": 89
+       },
+       {
+        "link": 11,
+        "street": "Hàm Nghi",
+        "to": "RB Vòng xoay Bến Thành",
+        "signalised": false,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 111.4,
+        "maxQueue": 13,
+        "departures": 74,
+        "maxStarveS": 26
+       },
+       {
+        "link": 30,
+        "street": "Đồng Khởi",
+        "to": "CS Giao lộ Đồng Khởi – Hàm Nghi [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 101.2,
+        "maxQueue": 42,
+        "departures": 120,
+        "maxStarveS": 48
+       },
+       {
+        "link": 22,
+        "street": "Lý Tự Trọng",
+        "to": "DN Chân cầu Ba Son [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 94.5,
+        "maxQueue": 34,
+        "departures": 124,
+        "maxStarveS": 33
+       },
+       {
+        "link": 7,
+        "street": "Lê Lợi",
+        "to": "RB Vòng xoay Bến Thành",
+        "signalised": false,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 89,
+        "maxQueue": 12,
+        "departures": 64,
+        "maxStarveS": 31
+       }
+      ],
+      "starved": [],
+      "starvedRoom": [],
+      "linksNeverVisited": [],
+      "rings": [
+       {
+        "ring": 0,
+        "name": "Vòng xoay Bến Thành",
+        "entries": 540,
+        "exits": 449,
+        "maxStopT": 86,
+        "stoppedOverLimit": 5272
+       }
+      ],
+      "wrong": {
+       "onewayLeft": 0,
+       "twoWayLeftNonSwarm": 0,
+       "swarmWrongTOver": 0,
+       "headingBad": 0,
+       "onewayHeadingBad": 0,
+       "samples": 1800,
+       "swarmMaxOverS": 0,
+       "vehicles": {
+        "onewayLeft": 0,
+        "twoWayLeftNonSwarm": 0,
+        "swarmWrongTOver": 0,
+        "headingBad": 0,
+        "onewayHeadingBad": 0
+       },
+       "bySegment": [],
+       "examples": []
+      }
+     },
+     "warnings": []
+    },
+    {
+     "args": {
+      "map": "legacy",
+      "hour": 17,
+      "minutes": 5,
+      "density": 1,
+      "target": 1100,
+      "seed": 5,
+      "seeds": null,
+      "sweep": null,
+      "nref": 1600,
+      "jobs": null,
+      "skipStatic": true,
+      "strictPerf": false,
+      "json": "/var/folders/1q/bvwn62jx2gj4nx1j77j0lkvm0000gn/T/harness-dhcJCF/t1100-s5.json"
+     },
+     "target": 1100,
+     "seed": 5,
+     "profile": "legacy",
+     "networkHash": null,
+     "populated": 595,
+     "kpiEnd": {
+      "count": 1098,
+      "avgKmh": 4.027572918758978,
+      "congestion": 88.80247967356205,
+      "waiting": 824,
+      "mix": [
+       548,
+       85,
+       334,
+       38,
+       35,
+       0,
+       0,
+       58
+      ],
+      "releases": 20,
+      "locksBroken": 0
+     },
+     "perf": {
+      "p50": 1.648750000000291,
+      "p95": 6.165457999999489,
+      "max": 141.6612500000001,
+      "mean": 2.491195751333344,
+      "budgetMs": 3
+     },
+     "metrics": {
+      "minutes": 5,
+      "spawns": 2009,
+      "despawns": 1486,
+      "releases": 20,
+      "locksBroken": 0,
+      "locks": 20,
+      "monitorReleases": 20,
+      "releasePct": 0.9955201592832255,
+      "speedPerMinute": [
+       13.5,
+       9,
+       7,
+       6.5,
+       5.3
+      ],
+      "despawnPerMinute": [
+       393,
+       294,
+       270,
+       270,
+       259
+      ],
+      "speedMeanKmh": 7.802985958616655,
+      "lateFromMinute": 2.5,
+      "lateSpeedKmh": 6.079540607286181,
+      "slope": null,
+      "tputRefMean": null,
+      "tputLateMean": null,
+      "tputRatio": null,
+      "starvedRoom": 0,
+      "starvedOld": 0,
+      "ringOver": 0,
+      "ringMaxStopT": 17
+     },
+     "checks": [
+      {
+       "id": "H1",
+       "title": "Bất biến dựng mạng",
+       "status": "pass",
+       "summary": "122 segment, 38 link, 17 nút, 6 đèn, 1 ring",
+       "details": []
+      },
+      {
+       "id": "H2",
+       "title": "Gridlock",
+       "status": "pass",
+       "summary": "[legacy] (a) ✓ release 20/2009 = 1.00 % (≤ 1.2 %) · (b) ? slope – km/h/phút (≥ -0.5) · despawn/phút –/– = – (±15 %) · (c) ✓ đói có chỗ ra 0 · (d) ✓ ring stopT>45s 0 mẫu (max 17 s) · (e) ✓ v̄ phút 2.5–5 = 6.08 km/h (≥ 4.5)",
+       "details": [
+        "(b) bỏ qua: cần chạy ≥ 10 phút",
+        "legacy: không áp slope/throughput (suy giảm có sẵn từ trước P2)",
+        "info (tiêu chí cũ): release 20/2009 = 1.00 % (cũ ≤ 2 %) · v̄ 6.08 (cũ ≥ 6) · đói theo định nghĩa cũ 0",
+        "info (đối chiếu): release theo diff-monitor 20 vs counter 20"
+       ]
+      },
+      {
+       "id": "H3",
+       "title": "Tất định",
+       "status": "skip",
+       "summary": "chạy ở seed đầu của mỗi cấu hình",
+       "details": []
+      },
+      {
+       "id": "H4",
+       "title": "Ngược chiều / hướng xe",
+       "status": "pass",
+       "summary": "0 vi phạm / 1800 lượt lấy mẫu",
+       "details": []
+      },
+      {
+       "id": "H5",
+       "title": "Đèn tín hiệu",
+       "status": "skip",
+       "summary": "chỉ chạy với --map osm",
+       "details": []
+      },
+      {
+       "id": "H6",
+       "title": "Vòng xoay",
+       "status": "skip",
+       "summary": "chỉ chạy với --map osm",
+       "details": []
+      },
+      {
+       "id": "H7",
+       "title": "Hiệu năng",
+       "status": "warn",
+       "summary": "p50 1.65 · p95 6.17 · max 141.66 ms/step (TB 2.49; ngân sách p95 ≤ 3)",
+       "details": [
+        "p95 6.17 ms > 3 ms (soft; dùng --strict-perf để chặn)"
+       ]
+      },
+      {
+       "id": "H8",
+       "title": "Báo cáo",
+       "status": "pass",
+       "summary": "spawn 2009 · despawn 1486 · release 20 · gỡ khoá 0 · link chưa ghé 0",
+       "details": []
+      }
+     ],
+     "report": {
+      "steps": 18000,
+      "seconds": 300,
+      "spawns": 2009,
+      "despawns": 1486,
+      "releases": 20,
+      "spawnByType": [
+       1266,
+       210,
+       384,
+       40,
+       40,
+       0,
+       0,
+       69
+      ],
+      "despawnByType": [
+       980,
+       167,
+       252,
+       28,
+       25,
+       4,
+       0,
+       30
+      ],
+      "despawnPerMinute": [
+       393,
+       294,
+       270,
+       270,
+       259
+      ],
+      "releaseByType": [
+       9,
+       4,
+       5,
+       0,
+       1,
+       0,
+       0,
+       1
+      ],
+      "spawnByPortal": [
+       {
+        "link": 37,
+        "portal": "pDS Tôn Đức Thắng",
+        "count": 307
+       },
+       {
+        "link": 34,
+        "portal": "pDN Tôn Đức Thắng",
+        "count": 246
+       },
+       {
+        "link": 12,
+        "portal": "pBN Pasteur",
+        "count": 237
+       },
+       {
+        "link": 33,
+        "portal": "pCS Đồng Khởi",
+        "count": 221
+       },
+       {
+        "link": 28,
+        "portal": "pCN Đồng Khởi",
+        "count": 210
+       },
+       {
+        "link": 25,
+        "portal": "pE Cầu Ba Son",
+        "count": 207
+       },
+       {
+        "link": 19,
+        "portal": "pBS Pasteur",
+        "count": 161
+       },
+       {
+        "link": 1,
+        "portal": "pW Lê Lai",
+        "count": 145
+       },
+       {
+        "link": 5,
+        "portal": "pRS Trần Hưng Đạo",
+        "count": 144
+       },
+       {
+        "link": 3,
+        "portal": "pRN Cách Mạng Tháng Tám",
+        "count": 131
+       }
+      ],
+      "despawnByPortal": [
+       {
+        "link": 35,
+        "portal": "pDN Tôn Đức Thắng",
+        "count": 198
+       },
+       {
+        "link": 36,
+        "portal": "pDS Tôn Đức Thắng",
+        "count": 195
+       },
+       {
+        "link": 24,
+        "portal": "pE Cầu Ba Son",
+        "count": 191
+       },
+       {
+        "link": 32,
+        "portal": "pCS Đồng Khởi",
+        "count": 166
+       },
+       {
+        "link": 29,
+        "portal": "pCN Đồng Khởi",
+        "count": 161
+       },
+       {
+        "link": 18,
+        "portal": "pBS Pasteur",
+        "count": 146
+       },
+       {
+        "link": 13,
+        "portal": "pBN Pasteur",
+        "count": 145
+       },
+       {
+        "link": 0,
+        "portal": "pW Lê Lai",
+        "count": 98
+       },
+       {
+        "link": 4,
+        "portal": "pRS Trần Hưng Đạo",
+        "count": 96
+       },
+       {
+        "link": 2,
+        "portal": "pRN Cách Mạng Tháng Tám",
+        "count": 90
+       }
+      ],
+      "releaseByJunction": [
+       {
+        "junction": "RB Vòng xoay Bến Thành",
+        "count": 17
+       },
+       {
+        "junction": "BS Giao lộ Pasteur – Hàm Nghi [đèn]",
+        "count": 1
+       },
+       {
+        "junction": "BM Giao lộ Lê Lợi – Pasteur [đèn]",
+        "count": 1
+       },
+       {
+        "junction": "CN Giao lộ Đồng Khởi – Lý Tự Trọng [đèn]",
+        "count": 1
+       }
+      ],
+      "speedByTypePerMinute": [
+       [
+        17.3,
+        16.6,
+        8.8,
+        10,
+        9.2,
+        8.9,
+        null,
+        7.1
+       ],
+       [
+        12.5,
+        12.7,
+        3.9,
+        3.7,
+        3.3,
+        1.2,
+        null,
+        4.6
+       ],
+       [
+        9.4,
+        8.6,
+        3.8,
+        2.5,
+        2.3,
+        0.1,
+        null,
+        3.9
+       ],
+       [
+        8.9,
+        7.5,
+        3.3,
+        3.3,
+        3.2,
+        2.7,
+        null,
+        4
+       ],
+       [
+        7.2,
+        7.5,
+        2.3,
+        2.1,
+        2.4,
+        11.9,
+        null,
+        3.9
+       ]
+      ],
+      "speedAllPerMinute": [
+       13.5,
+       9,
+       7,
+       6.5,
+       5.3
+      ],
+      "worstStopLines": [
+       {
+        "link": 1,
+        "street": "Lê Lai",
+        "to": "RB Vòng xoay Bến Thành",
+        "signalised": false,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 219.2,
+        "maxQueue": 54,
+        "departures": 120,
+        "maxStarveS": 33
+       },
+       {
+        "link": 11,
+        "street": "Hàm Nghi",
+        "to": "RB Vòng xoay Bến Thành",
+        "signalised": false,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 208.1,
+        "maxQueue": 21,
+        "departures": 74,
+        "maxStarveS": 58
+       },
+       {
+        "link": 21,
+        "street": "Lý Tự Trọng",
+        "to": "BN Giao lộ Pasteur – Lý Tự Trọng [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 187.5,
+        "maxQueue": 46,
+        "departures": 119,
+        "maxStarveS": 84
+       },
+       {
+        "link": 14,
+        "street": "Pasteur",
+        "to": "BM Giao lộ Lê Lợi – Pasteur [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 168.5,
+        "maxQueue": 46,
+        "departures": 136,
+        "maxStarveS": 58
+       },
+       {
+        "link": 25,
+        "street": "Cầu Ba Son",
+        "to": "DN Chân cầu Ba Son [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 167.5,
+        "maxQueue": 130,
+        "departures": 106,
+        "maxStarveS": 41
+       },
+       {
+        "link": 15,
+        "street": "Pasteur",
+        "to": "BN Giao lộ Pasteur – Lý Tự Trọng [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 164.1,
+        "maxQueue": 16,
+        "departures": 108,
+        "maxStarveS": 32
+       },
+       {
+        "link": 16,
+        "street": "Pasteur",
+        "to": "BS Giao lộ Pasteur – Hàm Nghi [đèn]",
+        "signalised": true,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 156.4,
+        "maxQueue": 59,
+        "departures": 110,
+        "maxStarveS": 28
+       },
+       {
+        "link": 9,
+        "street": "Lê Thánh Tôn",
+        "to": "RB Vòng xoay Bến Thành",
+        "signalised": false,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 139.7,
+        "maxQueue": 30,
+        "departures": 85,
+        "maxStarveS": 34
+       },
+       {
+        "link": 5,
+        "street": "Trần Hưng Đạo",
+        "to": "RB Vòng xoay Bến Thành",
+        "signalised": false,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 126.4,
+        "maxQueue": 37,
+        "departures": 135,
+        "maxStarveS": 14
+       },
+       {
+        "link": 3,
+        "street": "Cách Mạng Tháng Tám",
+        "to": "RB Vòng xoay Bến Thành",
+        "signalised": false,
+        "yields": false,
+        "lanes": 2,
+        "maxStopT": 124.6,
+        "maxQueue": 29,
+        "departures": 131,
+        "maxStarveS": 40
+       }
+      ],
+      "starved": [],
+      "starvedRoom": [],
+      "linksNeverVisited": [],
+      "rings": [
+       {
+        "ring": 0,
+        "name": "Vòng xoay Bến Thành",
+        "entries": 621,
+        "exits": 508,
+        "maxStopT": 17,
+        "stoppedOverLimit": 0
+       }
+      ],
+      "wrong": {
+       "onewayLeft": 0,
+       "twoWayLeftNonSwarm": 0,
+       "swarmWrongTOver": 0,
+       "headingBad": 0,
+       "onewayHeadingBad": 0,
+       "samples": 1800,
+       "swarmMaxOverS": 0,
+       "vehicles": {
+        "onewayLeft": 0,
+        "twoWayLeftNonSwarm": 0,
+        "swarmWrongTOver": 0,
+        "headingBad": 0,
+        "onewayHeadingBad": 0
+       },
+       "bySegment": [],
+       "examples": []
+      }
+     },
+     "warnings": []
+    }
+   ]
+  }
+ ]
+}

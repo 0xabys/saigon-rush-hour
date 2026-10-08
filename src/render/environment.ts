@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Rng } from '../core/rng';
-import { WORLD, type Network } from '../sim/network';
+import type { Bounds, Network } from '../sim/network';
 import { shared } from './materials';
 
 interface Key {
@@ -65,7 +65,12 @@ export class Environment {
   private lastBg = '';
   readonly skyColor = new THREE.Color();
 
+  /** Width of the map (east–west), the upper bound of the rain curtain. */
+  private readonly worldWidth: number;
+
   constructor(net: Network) {
+    const b: Bounds = net.bounds;
+    this.worldWidth = b.maxX - b.minX;
     this.hemi = new THREE.HemisphereLight(0xffffff, 0x888888, 1);
     this.group.add(this.hemi);
     this.sun = new THREE.DirectionalLight(0xffffff, 2);
@@ -179,7 +184,7 @@ export class Environment {
     for (let i = 0; i < PUDDLES; i++) {
       const l = links[rng.int(links.length)];
       l.sample(rng.range(6, l.length - 6), tmp);
-      const off = rng.range(-3, 3.2);
+      const off = rng.range(-0.9, 0.95) * l.halfW;
       const sx = rng.range(2.5, 6);
       m4.compose(
         new THREE.Vector3(tmp[0] - tmp[3] * off, 0.075, tmp[1] + tmp[2] * off),
@@ -241,8 +246,11 @@ export class Environment {
 
     this.skyColor.copy(this.skyBottom).lerp(this.skyTop, 0.35);
     this.fog.color.copy(this.skyBottom);
-    this.fog.near = camDist + 40 - rain * 120;
-    this.fog.far = camDist + 900 - rain * 520;
+    // The camera is orthographic, so fog depth is distance along the view axis: ground at the top edge of the
+    // screen sits ≈ 0.83·viewHalf further than the target. Start the haze past most of that and stretch its
+    // range with the view, so zooming out over the 1.5 km map keeps the far side readable but still hazy.
+    this.fog.near = camDist + 40 + viewHalf * 0.55 - rain * 120;
+    this.fog.far = camDist + 900 + viewHalf * 1.5 - rain * 520;
     this.puddleMat.uniforms.uSky.value.copy(this.skyColor);
     this.puddleMat.uniforms.uRain.value = rain;
 
@@ -259,7 +267,7 @@ export class Environment {
 
     this.rainMat.uniforms.uRain.value = rain;
     this.rainMat.uniforms.uCenter.value.copy(target);
-    this.rainMat.uniforms.uArea.value = Math.min(WORLD.maxX - WORLD.minX, viewHalf * 2.6);
+    this.rainMat.uniforms.uArea.value = Math.min(this.worldWidth, viewHalf * 2.6);
     this.rainMesh.visible = rainVisible && rain > 0.02;
   }
 }

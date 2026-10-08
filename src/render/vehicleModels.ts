@@ -63,9 +63,10 @@ export function grabGeometry(): THREE.BufferGeometry {
   const b = new GeoBuilder();
   scooterBody(b);
   rider(b, -0.18, 1);
-  b.box(0.52, 0.48, 0.52, -0.7, 1.13, 0, 0x00a651);
+  // Delivery box in the app's colour (c2: Grab green / Be yellow / Xanh SM teal); the rider's jacket is c1.
+  b.box(0.52, 0.48, 0.52, -0.7, 1.13, 0, 0xffffff, { paint: 2 });
   b.box(0.54, 0.08, 0.54, -0.7, 1.2, 0, 0xf2f2ea);
-  b.box(0.54, 0.05, 0.54, -0.7, 1.39, 0, 0x007a3c);
+  b.box(0.54, 0.05, 0.54, -0.7, 1.39, 0, 0x2a2c30);
   return b.build();
 }
 
@@ -129,6 +130,49 @@ export function taxiGeometry(): THREE.BufferGeometry {
   carBase(b, 1);
   b.box(4.32, 0.1, 1.78, 0, 0.82, 0, 0xffffff, { paint: 2 });
   b.box(0.62, 0.22, 0.32, -0.35, 1.68, 0, 0xffffff, { paint: 2, emis: 0xffe3a0, emisStrength: 1.6 });
+  return b.build();
+}
+
+/**
+ * VinFast-style compact EV (VF 5 / VF 3 proportions): short bonnet, tall boxy cabin, full-width LED strips front and rear.
+ * Paint slots: `body` for the shell and roof, c2 (paint 2) for the roof lamp / sign.
+ */
+function evBase(b: GeoBuilder, body: number): void {
+  for (const x of [1.28, -1.28]) {
+    for (const z of [0.82, -0.82]) {
+      b.place(wheel(0.34, 0.24), x, 0.34, z, TIRE, {}, [Math.PI / 2, 0, 0]);
+      b.place(wheel(0.18, 0.26), x, 0.34, z, CHROME, {}, [Math.PI / 2, 0, 0]);
+    }
+  }
+  b.box(4.2, 0.6, 1.78, 0, 0.68, 0, 0xffffff, { paint: body });
+  b.box(0.9, 0.12, 1.7, 1.5, 1.0, 0, 0xffffff, { paint: body }, 0, 0, -0.07);
+  b.box(2.2, 0.66, 1.64, -0.25, 1.3, 0, GLASS);
+  b.box(2.05, 0.08, 1.68, -0.3, 1.66, 0, 0xffffff, { paint: body });
+  // Black door-pillar band reads as a floating roof from above.
+  b.box(2.1, 0.04, 1.2, -0.3, 1.71, 0, 0x1e2327);
+  b.box(0.14, 0.26, 1.74, 2.1, 0.46, 0, 0x2d2d2d);
+  b.box(0.14, 0.26, 1.74, -2.1, 0.46, 0, 0x2d2d2d);
+  b.box(0.05, 0.07, 1.46, 2.12, 0.84, 0, 0xfff6e0, HEAD);
+  b.box(0.06, 0.11, 0.3, 2.12, 0.72, 0.7, 0xfff6e0, HEAD);
+  b.box(0.06, 0.11, 0.3, 2.12, 0.72, -0.7, 0xfff6e0, HEAD);
+  b.box(0.05, 0.07, 1.4, -2.12, 0.86, 0, 0x8a1d16, TAIL);
+  b.box(0.12, 0.1, 0.12, 0.65, 1.1, 0.92, 0x2d2d2d);
+  b.box(0.12, 0.1, 0.12, 0.65, 1.1, -0.92, 0x2d2d2d);
+}
+
+/** Xanh SM: all-teal VinFast EV (c1) with a white roof lamp (c2). */
+export function xanhSmGeometry(): THREE.BufferGeometry {
+  const b = new GeoBuilder();
+  evBase(b, 1);
+  b.box(0.5, 0.14, 0.3, -0.3, 1.82, 0, 0xffffff, { paint: 2, emis: 0xe8fff8, emisStrength: 1.1 });
+  return b.build();
+}
+
+/** Grab Car / Be Car: the same compact EV in a private-car colour (c1) with the app's roof sign in brand colour (c2). */
+export function hailCarGeometry(): THREE.BufferGeometry {
+  const b = new GeoBuilder();
+  evBase(b, 1);
+  b.box(0.62, 0.2, 0.34, -0.3, 1.86, 0, 0xffffff, { paint: 2, emis: 0xf4fff4, emisStrength: 0.9 });
   return b.build();
 }
 

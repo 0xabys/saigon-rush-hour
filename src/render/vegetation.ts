@@ -1,12 +1,25 @@
 import * as THREE from 'three';
 import { Rng } from '../core/rng';
-import { RIVER, RING_CENTER, ROAD_HALF, WORLD, type MapNode, type Network, type Road } from '../sim/network';
+import type { SceneJson } from '../data/q1Schema';
+import { PAVED_NO_TREES, resolveGround } from '../data/sceneOverrides';
+import { RoadClass, type Network } from '../sim/network';
 import { GeoBuilder } from './geo';
 import { makeMaterial } from './materials';
 import { glowTexture } from './textures';
-import { SITES, type Zoning } from './zones';
+import { pointInPolygon, type Zoning } from './zones';
 
-const ico = (r: number) => new THREE.IcosahedronGeometry(r, 1);
+/** Hard caps promised to the perf budget (P3 design). */
+export const MAX_TREES = 2500;
+export const MAX_LAMPS = 1300;
+
+/** Streets lined with coconut palms (the riverside boulevard and the walking street). */
+const PALM_STREETS: Record<string, true> = { 'Tôn Đức Thắng': true, 'Lê Lợi': true, 'Nguyễn Huệ': true };
+/** One park tree per this many square metres (stratified grid cell edge = √). */
+const PARK_AREA_PER_TREE = 150;
+/** Street trees keep this far from a bus stop. */
+const BUS_CLEAR = 10;
+
+const ico = (r: number) => new THREE.IcosahedronGeometry(r, 0);
 
 function tamarind(): THREE.BufferGeometry {
   const b = new GeoBuilder();
@@ -57,93 +70,185 @@ function lamp(): THREE.BufferGeometry {
 }
 
 type Tree = { x: number; z: number; s: number; yaw: number; tint: number };
+type Lamp = { x: number; z: number; yaw: number };
 
 export interface VegetationResult {
   group: THREE.Group;
   poolMat: THREE.MeshBasicMaterial;
+  /** Instances actually placed (after the caps). */
+  counts: { trees: number; palms: number; lamps: number };
 }
 
-export function buildVegetation(net: Network, zoning: Zoning): VegetationResult {
+/** Keeps `n` evenly spread items of `list` (deterministic, preserves spatial spread). */
+function thin<T>(list: T[], n: number): T[] {
+  if (list.length <= n) return list;
+  const out: T[] = [];
+  for (let i = 0; i < n; i++) out.push(list[Math.floor((i * list.length) / n)]);
+  return out;
+}
+
+export function buildVegetation(net: Network, scene: SceneJson, zoning: Zoning): VegetationResult {
   const group = new THREE.Group();
   group.name = 'vegetation';
   const rng = new Rng(9090);
-  const tams: Tree[] = [];
-  const palms: Tree[] = [];
-  const lamps: { x: number; z: number; yaw: number }[] = [];
   const greens = [0xffffff, 0xe8f2d8, 0xd8ebc6, 0xf4f0d0, 0xcfe0b8];
-  const add = (list: Tree[], x: number, z: number, s = 1) =>
-    list.push({ x, z, s: s * rng.range(0.85, 1.2), yaw: rng.range(0, Math.PI * 2), tint: rng.pick(greens) });
+  const make = (x: number, z: number, s = 1): Tree => ({
+    x,
+    z,
+    s: s * rng.range(0.85, 1.2),
+    yaw: rng.range(0, Math.PI * 2),
+    tint: rng.pick(greens),
+  });
 
-  const trim = (n: MapNode, r: Road) => (n.kind === 'portal' ? 3 : n.kind === 'ring' ? 33 : Math.min(Math.abs(r.dx), Math.abs(r.dz)) > 0.2 ? 24 : 16);
+  // Priority tiers; the caps cut residential streets first, then parks.
+  const palmsA: Tree[] = [];
+  const tamsA: Tree[] = [];
+  const tamsResidential: Tree[] = [];
+  const palmsPark: Tree[] = [];
+  const tamsPark: Tree[] = [];
+  const lamps: Lamp[] = [];
+
   const stops = net.busStops.map((st) => {
     const t = [0, 0, 0, 0];
     st.link.sample(st.s, t);
     return t;
   });
-  for (const r of net.roads) {
-    if (r.bridge) continue;
-    const t0 = trim(r.a, r);
-    const t1 = r.length - trim(r.b, r);
-    const palmsHere = r.name === 'Tôn Đức Thắng' || r.name === 'Lê Lợi';
-    for (const side of [1, -1]) {
-      const nx = -r.dz * side;
-      const nz = r.dx * side;
-      for (let t = t0 + rng.range(0, 5); t < t1; t += rng.range(10, 14)) {
-        const off = ROAD_HALF + 1.15;
-        const x = r.a.x + r.dx * t + nx * off;
-        const z = r.a.z + r.dz * t + nz * off;
-        if (x > RIVER.x0 - 30 && nx > 0.5) continue;
-        if (stops.some((p) => Math.hypot(p[0] - x, p[1] - z) < 10)) continue;
-        if (palmsHere) add(palms, x, z, 0.95);
-        else add(tams, x, z);
+  const p = [0, 0, 0, 0];
+
+  // ---- street trees and lamps along every frontage
+  for (const seg of net.links) {
+    if (seg.bridge || seg.length < 20) continue;
+    const arterial = seg.cls <= RoadClass.Tertiary;
+    const palms = PALM_STREETS[seg.name] === true;
+    // Right of travel is (−d.z, d.x). Two-way links keep the median free; the opposite link plants its own kerb.
+    const sides = seg.oneway && arterial ? [1, -1] : [1];
+    for (const side of sides) {
+      const treeT: number[] = [];
+      for (let t = 7 + rng.range(0, 5); t < seg.length - 5; t += rng.range(16, 22)) {
+        seg.sample(t, p);
+        const off = side * (seg.halfW + 1.15);
+        const x = p[0] - p[3] * off;
+        const z = p[1] + p[2] * off;
+        if (!zoning.treeFree(x, z)) continue;
+        if (stops.some((q) => Math.hypot(q[0] - x, q[1] - z) < BUS_CLEAR)) continue;
+        treeT.push(t);
+        if (palms) palmsA.push(make(x, z, 0.95));
+        else (arterial ? tamsA : tamsResidential).push(make(x, z));
       }
-      for (let t = t0 + 6; t < t1; t += 26) {
-        const off = ROAD_HALF + 0.55;
-        lamps.push({ x: r.a.x + r.dx * t + nx * off, z: r.a.z + r.dz * t + nz * off, yaw: Math.atan2(-nx, -nz) });
+      if (side !== 1) continue;
+      // Lamps: right kerb only, every ~30 m, nudged clear of a trunk.
+      for (let t = 9 + rng.range(0, 6); t < seg.length - 6; t += 30) {
+        let tl = t;
+        if (treeT.some((tt) => Math.abs(tt - tl) < 1.8)) tl += 2.4;
+        seg.sample(tl, p);
+        const nx = -p[3];
+        const nz = p[2];
+        const off = seg.halfW + 0.55;
+        const x = p[0] + nx * off;
+        const z = p[1] + nz * off;
+        if (!zoning.treeFree(x, z, 0.3)) continue;
+        lamps.push({ x, z, yaw: Math.atan2(-nx, -nz) });
       }
-    }
-  }
-  // Bạch Đằng park: rows of coconut palms along the river.
-  for (let z = WORLD.minZ + 6; z < WORLD.maxZ - 4; z += 9) {
-    if (Math.abs(z + 70) < 13) continue;
-    add(palms, 131 + rng.range(-1, 1), z + rng.range(-1.5, 1.5), 1.05);
-    if (rng.next() < 0.6) add(tams, 137 + rng.range(-1, 1), z + 4.5, 0.8);
-  }
-  // Nguyễn Huệ: shade trees down both edges of the plaza.
-  for (let z = -54; z <= 54; z += 8) {
-    if (Math.abs(z - 46) < 7) continue;
-    add(tams, -11, z, 0.65);
-    add(tams, 11, z, 0.65);
-  }
-  // Roundabout island palms.
-  for (let i = 0; i < 6; i++) {
-    const a = (i / 6) * Math.PI * 2 + 0.3;
-    add(palms, RING_CENTER.x + Math.cos(a) * 6, RING_CENTER.z + Math.sin(a) * 6, 0.9);
-  }
-  // Committee lawn palms.
-  for (const x of [-20, -10, 10, 20]) add(palms, x, SITES.committee.z1 + 2, 0.9);
-  // Thủ Thiêm park and leftover pockets of the city.
-  for (let i = 0; i < 320; i++) {
-    const east = i < 120;
-    const x = east ? rng.range(RIVER.x1 + 10, WORLD.maxX - 3) : rng.range(WORLD.minX + 3, RIVER.x0 - 30);
-    const z = rng.range(WORLD.minZ + 3, WORLD.maxZ - 3);
-    if (east) {
-      if (Math.abs(z + 70) < 13 || zoning.roadDist(x, z) < ROAD_HALF + 3) continue;
-      if (x > SITES.landmark81.x0 - 4 && x < SITES.landmark81.x1 + 4 && z > SITES.landmark81.z0 - 4 && z < SITES.landmark81.z1 + 4) continue;
-      if (!zoning.buildable(x, z)) continue;
-      zoning.stamp(x, z, 1, 0, 1.5, 1.5, 0);
-      add(rng.next() < 0.35 ? palms : tams, x, z, rng.range(0.8, 1.2));
-    } else if (zoning.rectFree(x, z, 1, 0, 1.6, 1.6)) {
-      zoning.stamp(x, z, 1, 0, 1.6, 1.6, 0);
-      add(tams, x, z, rng.range(0.7, 1));
     }
   }
 
+  // ---- roundabout islands: a ring of palms
+  for (const ring of net.rings) {
+    const island = ring.r - ring.halfW - 0.5;
+    if (island < 2.5) continue;
+    if (island < 5) {
+      palmsA.push(make(ring.cx, ring.cz, 0.9));
+      continue;
+    }
+    const n = island < 8 ? 4 : 6;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2 + 0.3;
+      palmsA.push(make(ring.cx + Math.cos(a) * island * 0.55, ring.cz + Math.sin(a) * island * 0.55, 0.9));
+    }
+  }
+
+  // ---- parks: a jittered grid of trees inside each polygon (coconut palms along the Bạch Đằng riverfront park)
+  const cell = Math.sqrt(PARK_AREA_PER_TREE);
+  for (const park of scene.parks) {
+    const pts = park.pts;
+    let x0 = Infinity;
+    let x1 = -Infinity;
+    let z0 = Infinity;
+    let z1 = -Infinity;
+    for (let i = 0; i < pts.length; i += 2) {
+      x0 = Math.min(x0, pts[i]);
+      x1 = Math.max(x1, pts[i]);
+      z0 = Math.min(z0, pts[i + 1]);
+      z1 = Math.max(z1, pts[i + 1]);
+    }
+    const riverfront = park.name.includes('Bạch Đằng');
+    const palmShare = riverfront ? 0.55 : 0.12;
+    // Lawns of at least 400 m² keep their trees off the paved edge: all four corners of a 1.4 m box must lie on the grass too.
+    const lawn = (x1 - x0) * (z1 - z0) > 400;
+    const place = (x: number, z: number) => {
+      if (!pointInPolygon(pts, x, z) || !zoning.treeFree(x, z, 0.8)) return false;
+      if (lawn && !(pointInPolygon(pts, x - 1.4, z - 1.4) && pointInPolygon(pts, x + 1.4, z - 1.4) && pointInPolygon(pts, x - 1.4, z + 1.4) && pointInPolygon(pts, x + 1.4, z + 1.4))) return false;
+      if (rng.next() < palmShare) palmsPark.push(make(x, z, riverfront ? 1.05 : 0.95));
+      else tamsPark.push(make(x, z, rng.range(0.75, 1.1)));
+      return true;
+    };
+    let placed = 0;
+    for (let gz = z0 + cell / 2; gz < z1 + cell / 2; gz += cell) {
+      for (let gx = x0 + cell / 2; gx < x1 + cell / 2; gx += cell) {
+        if (place(gx + rng.range(-0.35, 0.35) * cell, gz + rng.range(-0.35, 0.35) * cell)) placed++;
+      }
+    }
+    // Pocket parks too small for a grid cell still get one tree near the middle of their bounds.
+    if (placed === 0 && (x1 - x0) * (z1 - z0) > 60) place((x0 + x1) / 2, (z0 + z1) / 2);
+  }
+
+  // ---- squares and pedestrian areas: a sparse jittered grid of shade trees (never on asphalt; zoning keeps them off footprints and sites)
+  const plazaCell = cell * 1.7;
+  for (const plaza of resolveGround(scene).plazas) {
+    if (PAVED_NO_TREES[plaza.osm]) continue;
+    const pts = plaza.pts;
+    let x0 = Infinity;
+    let x1 = -Infinity;
+    let z0 = Infinity;
+    let z1 = -Infinity;
+    for (let i = 0; i < pts.length; i += 2) {
+      x0 = Math.min(x0, pts[i]);
+      x1 = Math.max(x1, pts[i]);
+      z0 = Math.min(z0, pts[i + 1]);
+      z1 = Math.max(z1, pts[i + 1]);
+    }
+    for (let gz = z0 + plazaCell / 2; gz < z1 + plazaCell / 2; gz += plazaCell) {
+      for (let gx = x0 + plazaCell / 2; gx < x1 + plazaCell / 2; gx += plazaCell) {
+        const x = gx + rng.range(-0.3, 0.3) * plazaCell;
+        const z = gz + rng.range(-0.3, 0.3) * plazaCell;
+        if (pointInPolygon(pts, x, z) && zoning.treeFree(x, z, 1.5)) tamsPark.push(make(x, z, rng.range(0.8, 1.1)));
+      }
+    }
+  }
+
+  // ---- caps: palms + arterial trees first, parks next, residential streets last
+  const priority = [...palmsA, ...tamsA].length;
+  const keepA = Math.min(priority, Math.floor(MAX_TREES * 0.65));
+  const room = MAX_TREES - keepA;
+  const parkAll = palmsPark.length + tamsPark.length;
+  const resQuota = Math.min(tamsResidential.length, Math.floor(room * 0.4));
+  const parkQuota = Math.min(parkAll, room - resQuota);
+  const resKeep = Math.min(tamsResidential.length, room - parkQuota);
+  const palmShareA = palmsA.length / Math.max(1, priority);
+  const palmKeepA = Math.min(palmsA.length, Math.round(keepA * palmShareA));
+  const parkPalmKeep = Math.min(palmsPark.length, Math.round(parkQuota * (palmsPark.length / Math.max(1, parkAll))));
+  const palms = [...thin(palmsA, palmKeepA), ...thin(palmsPark, parkPalmKeep)];
+  const tams = [...thin(tamsA, keepA - palmKeepA), ...thin(tamsPark, parkQuota - parkPalmKeep), ...thin(tamsResidential, resKeep)];
+  const lampsKept = thin(lamps, MAX_LAMPS);
+
+  // ---- meshes
   const treeMat = makeMaterial({ sway: true }, { roughness: 0.9 });
   const col = new THREE.Color();
   const q = new THREE.Quaternion();
   const up = new THREE.Vector3(0, 1, 0);
   const m4 = new THREE.Matrix4();
+  const pos = new THREE.Vector3();
+  const scl = new THREE.Vector3();
   for (const [geo, list] of [
     [tamarind(), tams],
     [palm(), palms],
@@ -151,7 +256,7 @@ export function buildVegetation(net: Network, zoning: Zoning): VegetationResult 
     const mesh = new THREE.InstancedMesh(geo, treeMat, list.length);
     list.forEach((t, k) => {
       q.setFromAxisAngle(up, t.yaw);
-      mesh.setMatrixAt(k, m4.compose(new THREE.Vector3(t.x, 0, t.z), q, new THREE.Vector3(t.s, t.s, t.s)));
+      mesh.setMatrixAt(k, m4.compose(pos.set(t.x, 0, t.z), q, scl.set(t.s, t.s, t.s)));
       mesh.setColorAt(k, col.setHex(t.tint));
     });
     mesh.castShadow = true;
@@ -159,10 +264,11 @@ export function buildVegetation(net: Network, zoning: Zoning): VegetationResult 
     group.add(mesh);
   }
 
-  const lampMesh = new THREE.InstancedMesh(lamp(), makeMaterial(), lamps.length);
-  lamps.forEach((l, k) => {
+  const lampMesh = new THREE.InstancedMesh(lamp(), makeMaterial(), lampsKept.length);
+  scl.set(1, 1, 1);
+  lampsKept.forEach((l, k) => {
     q.setFromAxisAngle(up, l.yaw);
-    lampMesh.setMatrixAt(k, m4.compose(new THREE.Vector3(l.x, 0, l.z), q, new THREE.Vector3(1, 1, 1)));
+    lampMesh.setMatrixAt(k, m4.compose(pos.set(l.x, 0, l.z), q, scl));
   });
   lampMesh.castShadow = true;
   group.add(lampMesh);
@@ -174,13 +280,13 @@ export function buildVegetation(net: Network, zoning: Zoning): VegetationResult 
     blending: THREE.AdditiveBlending,
     opacity: 0,
   });
-  const pools = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), poolMat, lamps.length);
-  lamps.forEach((l, k) => {
-    const fx = Math.sin(l.yaw);
-    const fz = Math.cos(l.yaw);
-    pools.setMatrixAt(k, m4.compose(new THREE.Vector3(l.x + fx * 2.6, 0.08, l.z + fz * 2.6), q.identity(), new THREE.Vector3(13, 1, 13)));
+  const pools = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), poolMat, lampsKept.length);
+  scl.set(13, 1, 13);
+  q.identity();
+  lampsKept.forEach((l, k) => {
+    pools.setMatrixAt(k, m4.compose(pos.set(l.x + Math.sin(l.yaw) * 2.6, 0.08, l.z + Math.cos(l.yaw) * 2.6), q, scl));
   });
   pools.renderOrder = 1;
   group.add(pools);
-  return { group, poolMat };
+  return { group, poolMat, counts: { trees: tams.length + palms.length, palms: palms.length, lamps: lampsKept.length } };
 }

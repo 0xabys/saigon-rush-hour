@@ -165,3 +165,39 @@ export function signAtlas(): THREE.CanvasTexture {
   });
   return finish(c, false);
 }
+
+/**
+ * Corrugated-sheet site hoarding, one 2.4 m panel across (8 ribs) and 2.4 m tall: grey-scale, multiplied by the
+ * panel's vertex colour. Dark rusty skirt at the foot, folded cap at the top, a post seam at both panel edges.
+ */
+export function corrugatedTexture(): THREE.CanvasTexture {
+  const W = 128;
+  const H = 128;
+  const [c, g] = canvas(W, H);
+  const r = new Rng(77);
+  const rib = W / 8;
+  for (let x = 0; x < W; x++) {
+    // Each rib is a sine bump: lit flank, crest, shaded flank.
+    const k = 0.74 + 0.26 * Math.cos(((x % rib) / rib) * Math.PI * 2 - 0.9);
+    g.fillStyle = `hsl(0 0% ${Math.round(k * 100)}%)`;
+    g.fillRect(x, 0, 1, H);
+  }
+  // Weathering: faint vertical streaks and a few scuffs.
+  for (let i = 0; i < 60; i++) {
+    g.fillStyle = `rgba(60,50,40,${0.04 + 0.06 * r.next()})`;
+    g.fillRect(r.range(0, W), r.range(0, H * 0.8), r.range(1, 3), r.range(10, 50));
+  }
+  // Foot (canvas y grows downwards): mud and rust.
+  const foot = g.createLinearGradient(0, H * 0.82, 0, H);
+  foot.addColorStop(0, 'rgba(120,84,52,0)');
+  foot.addColorStop(1, 'rgba(120,84,52,0.75)');
+  g.fillStyle = foot;
+  g.fillRect(0, H * 0.82, W, H * 0.18);
+  // Folded top cap and the post seams.
+  g.fillStyle = 'rgba(40,40,44,0.5)';
+  g.fillRect(0, 0, W, 5);
+  g.fillStyle = 'rgba(40,40,44,0.55)';
+  g.fillRect(0, 0, 2, H);
+  g.fillRect(W - 2, 0, 2, H);
+  return finish(c);
+}

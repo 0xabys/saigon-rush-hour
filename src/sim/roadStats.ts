@@ -25,11 +25,14 @@ export interface RoadStatsSnapshot {
  */
 export class RoadStats {
   readonly roads: Road[];
-  /** Road length in metres between junction boxes. */
+  /** Road length in metres (centreline, between junction boxes). */
   readonly lengths: Float32Array;
   readonly liveCount: Float32Array;
   readonly liveSpeed: Float32Array;
   private readonly roadOfSeg: Int16Array;
+  /** Centreline pieces `[x0, z0, x1, z1]` (≈4 m long) and the road each belongs to. */
+  private readonly pieces: Float32Array;
+  private readonly pieceRoad: Int16Array;
   private vehSum: Float64Array;
   private speedSum: Float64Array;
   private samples: Float64Array;
@@ -42,11 +45,33 @@ export class RoadStats {
     const R = net.roads.length;
     this.roadOfSeg = new Int16Array(net.segments.length).fill(-1);
     this.lengths = new Float32Array(R);
+    const pieces: number[] = [];
+    const pieceRoad: number[] = [];
+    const tmp = [0, 0, 0, 0];
     for (const l of net.links) {
       if (!l.road) continue;
       this.roadOfSeg[l.id] = l.road.id;
-      this.lengths[l.road.id] += l.length / 2;
+      // A two-way street has two links over the same centreline: count it once.
+      this.lengths[l.road.id] += l.oneway ? l.length : l.length / 2;
+      if (!l.oneway && (l.from?.id ?? 0) > (l.to?.id ?? 0)) continue;
+      const k = Math.max(1, Math.round(l.length / 4));
+      let px = 0;
+      let pz = 0;
+      for (let i = 0; i <= k; i++) {
+        l.sample((l.length * i) / k, tmp);
+        // Samples sit on the reference line; step back to the road centre.
+        const x = tmp[0] + tmp[3] * l.refOffset;
+        const z = tmp[1] - tmp[2] * l.refOffset;
+        if (i > 0) {
+          pieces.push(px, pz, x, z);
+          pieceRoad.push(l.road.id);
+        }
+        px = x;
+        pz = z;
+      }
     }
+    this.pieces = Float32Array.from(pieces);
+    this.pieceRoad = Int16Array.from(pieceRoad);
     this.liveCount = new Float32Array(R);
     this.liveSpeed = new Float32Array(R);
     this.vehSum = new Float64Array(R * 24);
@@ -102,14 +127,19 @@ export class RoadStats {
   nearest(x: number, z: number, maxDist: number): number {
     let best = -1;
     let bestD = maxDist;
-    for (const r of this.roads) {
-      const dx = r.b.x - r.a.x;
-      const dz = r.b.z - r.a.z;
-      const t = Math.max(0, Math.min(1, ((x - r.a.x) * dx + (z - r.a.z) * dz) / (dx * dx + dz * dz)));
-      const d = Math.hypot(x - r.a.x - dx * t, z - r.a.z - dz * t);
+    const P = this.pieces;
+    for (let k = 0; k < this.pieceRoad.length; k++) {
+      const x0 = P[k * 4];
+      const z0 = P[k * 4 + 1];
+      const dx = P[k * 4 + 2] - x0;
+      const dz = P[k * 4 + 3] - z0;
+      if (x < Math.min(x0, x0 + dx) - bestD || x > Math.max(x0, x0 + dx) + bestD) continue;
+      if (z < Math.min(z0, z0 + dz) - bestD || z > Math.max(z0, z0 + dz) + bestD) continue;
+      const t = Math.max(0, Math.min(1, ((x - x0) * dx + (z - z0) * dz) / (dx * dx + dz * dz || 1)));
+      const d = Math.hypot(x - x0 - dx * t, z - z0 - dz * t);
       if (d < bestD) {
         bestD = d;
-        best = r.id;
+        best = this.pieceRoad[k];
       }
     }
     return best;

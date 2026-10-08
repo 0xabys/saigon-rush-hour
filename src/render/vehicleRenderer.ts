@@ -1,17 +1,19 @@
 import * as THREE from 'three';
 import { rand01 } from '../core/rng';
 import { CAPACITY, type Traffic } from '../sim/traffic';
-import { SPECS, VType } from '../sim/vehicleTypes';
+import { hailBrand, SPECS, VType } from '../sim/vehicleTypes';
 import { makeMaterial, shared } from './materials';
 import {
   busGeometry,
   carGeometry,
   cycloGeometry,
   grabGeometry,
+  hailCarGeometry,
   headlightPoolTexture,
   motoGeometry,
   taxiGeometry,
   truckGeometry,
+  xanhSmGeometry,
 } from './vehicleModels';
 
 const enum Model {
@@ -24,6 +26,8 @@ const enum Model {
   Bus = 6,
   Truck = 7,
   Cyclo = 8,
+  XanhSm = 9,
+  HailCar = 10,
 }
 
 function modelOf(type: VType, uid: number): Model {
@@ -45,6 +49,8 @@ function modelOf(type: VType, uid: number): Model {
       return Model.Truck;
     case VType.Cyclo:
       return Model.Cyclo;
+    case VType.RideCar:
+      return hailBrand(uid, type) === 2 ? Model.XanhSm : Model.HailCar;
   }
 }
 
@@ -71,6 +77,8 @@ export class VehicleRenderer {
       busGeometry(),
       truckGeometry(),
       cycloGeometry(),
+      xanhSmGeometry(),
+      hailCarGeometry(),
     ];
     const mat = makeMaterial({ color2: true }, { roughness: 0.55 });
     this.color2 = [];
